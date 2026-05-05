@@ -10,6 +10,8 @@ use bevy::{
 const BALL_SIZE: f32 = 10.;
 const CANVAS_SIZE: Vec2 = Vec2::new(1280., 720.);
 const BRICK_SIZE: Vec2 = Vec2::new(80., 40.);
+const DEFAULT_PADDLE_SIZE: Vec2 = Vec2::new(200., 20.);
+const PADDLE_SPEED: f32 = 600.;
 
 #[derive(Component)]
 struct Ball;
@@ -20,12 +22,18 @@ struct Velocity(Vec2);
 #[derive(Component)]
 struct Wall(Plane2d);
 
+#[derive(Component)]
+struct Paddle;
+
+#[derive(Component)]
+struct HalfSize(Vec2);
+
 fn main() {
     App::new()
         .insert_resource(ClearColor(Color::from(SKY_300)))
         .add_plugins(DefaultPlugins)
         .add_systems(Startup, startup)
-        .add_systems(FixedUpdate, ball_movement)
+        .add_systems(FixedUpdate, (paddle_controls, ball_movement))
         .run();
 }
 
@@ -47,7 +55,7 @@ fn startup(
 
     commands.spawn((
         Ball,
-        Velocity(Vec2::new(-20., -40.)),
+        Velocity(Vec2::new(-240., -480.)),
         Mesh2d(meshes.add(Circle::new(BALL_SIZE))),
         MeshMaterial2d(materials.add(Color::from(SLATE_900))),
         Transform::from_xyz(0.0, 0.0, 0.0),
@@ -89,18 +97,59 @@ fn startup(
     // Bottom wall
     commands.spawn((
         Wall(Plane2d::new(Vec2::Y)),
-        Transform::from_xyz(-CANVAS_SIZE.y / 2.0, 0.0, 0.0),
+        Transform::from_xyz(0.0, -CANVAS_SIZE.y / 2.0, 0.0),
     ));
     // Top wall
     commands.spawn((
         Wall(Plane2d::new(Vec2::NEG_Y)),
-        Transform::from_xyz(CANVAS_SIZE.y / 2.0, 0.0, 0.0),
+        Transform::from_xyz(0.0, CANVAS_SIZE.y / 2.0, 0.0),
+    ));
+
+    commands.spawn((
+        Sprite {
+            custom_size: Some(DEFAULT_PADDLE_SIZE),
+            color: Color::from(SKY_50),
+            ..default()
+        },
+        Transform::from_xyz(0.0, -CANVAS_SIZE.y * 3.0 / 8.0, 0.0),
+        Paddle,
+        HalfSize(DEFAULT_PADDLE_SIZE / 2.),
     ));
 }
 
-fn ball_movement(mut query: Query<(&Velocity, &mut Transform), With<Ball>>, time: Res<Time>) {
-    for (velocity, mut transform) in &mut query {
+fn ball_movement(
+    mut query: Query<(&mut Velocity, &mut Transform), With<Ball>>,
+    walls: Query<(&Wall, &Transform), Without<Ball>>,
+    time: Res<Time>,
+) {
+    for (mut velocity, mut transform) in &mut query {
         let ball_movement_this_frame = velocity.0 * time.delta_secs();
+        let ball_ray = Ray2d::new(transform.translation.xy(), Dir2::new(velocity.0).unwrap());
+
+        for (wall, transform) in &walls {
+            if let Some(distance_to_wall) =
+                ball_ray.intersect_plane(transform.translation.xy(), wall.0)
+                && ball_movement_this_frame.length() >= distance_to_wall
+            {
+                velocity.0 = velocity.0.reflect(wall.0.normal.as_vec2());
+                return;
+            }
+        }
+
         transform.translation += ball_movement_this_frame.extend(0.0);
+    }
+}
+
+fn paddle_controls(
+    keys: Res<ButtonInput<KeyCode>>,
+    mut paddles: Query<&mut Transform, With<Paddle>>,
+    time: Res<Time>,
+) {
+    for mut transform in &mut paddles {
+        if keys.pressed(KeyCode::KeyA) {
+            transform.translation.x -= PADDLE_SPEED * time.delta_secs();
+        } else if keys.pressed(KeyCode::KeyD) {
+            transform.translation.x += PADDLE_SPEED * time.delta_secs();
+        }
     }
 }
