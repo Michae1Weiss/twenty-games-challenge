@@ -142,13 +142,18 @@ fn ball_movement(
 
 fn paddle_controls(
     keys: Res<ButtonInput<KeyCode>>,
-    mut paddles: Query<&mut Transform, With<Paddle>>,
+    mut paddles: Query<(&mut Transform, &HalfSize), With<Paddle>>,
     time: Res<Time>,
 ) {
-    for mut transform in &mut paddles {
-        if keys.pressed(KeyCode::KeyA) {
+    for (mut transform, half_size) in &mut paddles {
+        if keys.pressed(KeyCode::KeyA)
+            && transform.translation.x - half_size.0.x > -CANVAS_SIZE.x / 2.
+        {
+            println!("{}", transform.translation.x);
             transform.translation.x -= PADDLE_SPEED * time.delta_secs();
-        } else if keys.pressed(KeyCode::KeyD) {
+        } else if keys.pressed(KeyCode::KeyD)
+            && transform.translation.x + half_size.0.x < CANVAS_SIZE.x / 2.
+        {
             transform.translation.x += PADDLE_SPEED * time.delta_secs();
         }
     }
