@@ -1,8 +1,14 @@
+use std::f32::consts::{FRAC_PI_2, FRAC_PI_4, PI};
+
 use bevy::{
     camera::ScalingMode,
     color::palettes::{
         css::{BLACK, WHITE},
         tailwind::{SKY_50, SKY_300, SKY_500, SKY_800, SLATE_900},
+    },
+    math::{
+        FloatOrd,
+        bounding::{Aabb2d, RayCast2d},
     },
     prelude::*,
 };
@@ -120,20 +126,48 @@ fn startup(
 fn ball_movement(
     mut query: Query<(&mut Velocity, &mut Transform), With<Ball>>,
     walls: Query<(&Wall, &Transform), Without<Ball>>,
+    aabb_colliders: Query<(Entity, &Transform, &HalfSize), Without<Ball>>,
+    paddles: Query<(), With<Paddle>>,
     time: Res<Time>,
 ) {
     for (mut velocity, mut transform) in &mut query {
         let ball_movement_this_frame = velocity.0 * time.delta_secs();
+        let ball_move_distance = ball_movement_this_frame.length();
         let ball_ray = Ray2d::new(transform.translation.xy(), Dir2::new(velocity.0).unwrap());
 
         for (wall, transform) in &walls {
             if let Some(distance_to_wall) =
                 ball_ray.intersect_plane(transform.translation.xy(), wall.0)
-                && ball_movement_this_frame.length() >= distance_to_wall
+                && ball_move_distance >= distance_to_wall
             {
                 velocity.0 = velocity.0.reflect(wall.0.normal.as_vec2());
                 return;
             }
+        }
+
+        let ball_cast = RayCast2d::from_ray(ball_ray, ball_move_distance);
+
+        if let Some((entity, origin, _, _)) = aabb_colliders
+            .iter()
+            .filter_map(|(entity, origin, half_size)| {
+                let collider = Aabb2d::new(origin.translation.xy(), half_size.0);
+
+                let distance = ball_cast.aabb_intersection_at(&collider)?;
+
+                Some((entity, origin, collider, distance))
+            })
+            .min_by_key(|(_, _, _, distance)| FloatOrd(*distance))
+        {
+            if paddles.get(entity).is_ok() {
+                let direction_vector = transform.translation.xy() - origin.translation.xy();
+                let angle = direction_vector.to_angle();
+                let linear_angle = angle.clamp(0., PI) / PI;
+                let softened_angle = FRAC_PI_4.lerp(PI - FRAC_PI_4, linear_angle);
+                velocity.0 = Vec2::from_angle(softened_angle) * velocity.0.length();
+            } else {
+                unimplemented!();
+            }
+            break;
         }
 
         transform.translation += ball_movement_this_frame.extend(0.0);
