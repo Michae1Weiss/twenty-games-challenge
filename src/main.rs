@@ -11,6 +11,7 @@ use bevy::{
         bounding::{Aabb2d, RayCast2d},
     },
     prelude::*,
+    tasks::tick_global_task_pools_on_main_thread,
 };
 
 const BALL_SIZE: f32 = 10.;
@@ -30,6 +31,9 @@ struct Wall(Plane2d);
 
 #[derive(Component)]
 struct Paddle;
+
+#[derive(Component)]
+struct Brick;
 
 #[derive(Component)]
 struct HalfSize(Vec2);
@@ -64,7 +68,7 @@ fn startup(
         Velocity(Vec2::new(-240., -480.)),
         Mesh2d(meshes.add(Circle::new(BALL_SIZE))),
         MeshMaterial2d(materials.add(Color::from(SLATE_900))),
-        Transform::from_xyz(0.0, 0.0, 0.0),
+        Transform::from_xyz(0.0, -50.0, 0.0),
         children![(
             Mesh2d(meshes.add(Circle::new(BALL_SIZE - 1.0))),
             MeshMaterial2d(materials.add(Color::from(WHITE))),
@@ -121,6 +125,29 @@ fn startup(
         Paddle,
         HalfSize(DEFAULT_PADDLE_SIZE / 2.),
     ));
+
+    let n_rows: i32 = 6;
+    let n_columns: i32 = 13;
+    let base_color = Oklcha::from(SKY_300);
+
+    for row in 0..n_rows {
+        for column in 0..n_columns {
+            commands.spawn((
+                Brick,
+                Sprite {
+                    custom_size: Some(BRICK_SIZE),
+                    color: base_color.into(),
+                    ..default()
+                },
+                Transform::from_xyz(
+                    -480. + BRICK_SIZE.x * column as f32,
+                    240. - BRICK_SIZE.y * row as f32,
+                    0.0,
+                ),
+                HalfSize(BRICK_SIZE / 2.),
+            ));
+        }
+    }
 }
 
 fn ball_movement(
@@ -128,7 +155,9 @@ fn ball_movement(
     walls: Query<(&Wall, &Transform), Without<Ball>>,
     aabb_colliders: Query<(Entity, &Transform, &HalfSize), Without<Ball>>,
     paddles: Query<(), With<Paddle>>,
+    bricks: Query<(), With<Brick>>,
     time: Res<Time>,
+    mut commands: Commands,
 ) {
     for (mut velocity, mut transform) in &mut query {
         let ball_movement_this_frame = velocity.0 * time.delta_secs();
@@ -147,7 +176,7 @@ fn ball_movement(
 
         let ball_cast = RayCast2d::from_ray(ball_ray, ball_move_distance);
 
-        if let Some((entity, origin, _, _)) = aabb_colliders
+        if let Some((entity, origin, aabb_collider, _)) = aabb_colliders
             .iter()
             .filter_map(|(entity, origin, half_size)| {
                 let collider = Aabb2d::new(origin.translation.xy(), half_size.0);
@@ -164,8 +193,35 @@ fn ball_movement(
                 let linear_angle = angle.clamp(0., PI) / PI;
                 let softened_angle = FRAC_PI_4.lerp(PI - FRAC_PI_4, linear_angle);
                 velocity.0 = Vec2::from_angle(softened_angle) * velocity.0.length();
-            } else {
-                unimplemented!();
+            } else if bricks.get(entity).is_ok() {
+                let (hit_normal, _) = [
+                    (
+                        Vec2::new(origin.translation.x, aabb_collider.max.y),
+                        Plane2d::new(Vec2::Y),
+                    ),
+                    (
+                        Vec2::new(origin.translation.x, aabb_collider.min.y),
+                        Plane2d::new(Vec2::NEG_Y),
+                    ),
+                    (
+                        Vec2::new(aabb_collider.max.x, origin.translation.y),
+                        Plane2d::new(Vec2::X),
+                    ),
+                    (
+                        Vec2::new(aabb_collider.min.x, origin.translation.y),
+                        Plane2d::new(Vec2::NEG_X),
+                    ),
+                ]
+                .into_iter()
+                .filter_map(|(location, plane)| {
+                    ball_ray
+                        .intersect_plane(location, plane)
+                        .map(|hit_distance| (plane.normal, hit_distance))
+                })
+                .min_by_key(|(_, hit_distance)| FloatOrd(*hit_distance))
+                .unwrap();
+                commands.entity(entity).despawn();
+                velocity.0 = velocity.0.reflect(hit_normal.into());
             }
             break;
         }
