@@ -1,17 +1,16 @@
-use std::f32::consts::{FRAC_PI_2, FRAC_PI_4, PI};
+use std::f32::consts::{FRAC_PI_4, PI};
 
 use bevy::{
     camera::ScalingMode,
     color::palettes::{
-        css::{BLACK, WHITE},
-        tailwind::{SKY_50, SKY_300, SKY_500, SKY_800, SLATE_900},
+        css::WHITE,
+        tailwind::{SKY_50, SKY_300, SKY_800, SLATE_900},
     },
     math::{
         FloatOrd,
         bounding::{Aabb2d, RayCast2d},
     },
     prelude::*,
-    tasks::tick_global_task_pools_on_main_thread,
 };
 
 const BALL_SIZE: f32 = 10.;
@@ -19,6 +18,7 @@ const CANVAS_SIZE: Vec2 = Vec2::new(1280., 720.);
 const BRICK_SIZE: Vec2 = Vec2::new(80., 40.);
 const DEFAULT_PADDLE_SIZE: Vec2 = Vec2::new(200., 20.);
 const PADDLE_SPEED: f32 = 600.;
+const BALL_SPEED: f32 = 100.;
 
 #[derive(Component)]
 struct Ball;
@@ -65,7 +65,7 @@ fn startup(
 
     commands.spawn((
         Ball,
-        Velocity(Vec2::new(-240., -480.)),
+        Velocity(Vec2::new(0.0, -BALL_SPEED)),
         Mesh2d(meshes.add(Circle::new(BALL_SIZE))),
         MeshMaterial2d(materials.add(Color::from(SLATE_900))),
         Transform::from_xyz(0.0, -50.0, 0.0),
