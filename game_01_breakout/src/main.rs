@@ -4,13 +4,14 @@ use bevy::{
     camera::ScalingMode,
     color::palettes::{
         css::WHITE,
-        tailwind::{SKY_50, SKY_300, SKY_800, SLATE_900},
+        tailwind::{SKY_50, SKY_300, SKY_600, SKY_800, SLATE_900},
     },
     math::{
         FloatOrd,
         bounding::{Aabb2d, RayCast2d},
     },
     prelude::*,
+    sprite::Anchor,
 };
 
 const BALL_SIZE: f32 = 10.;
@@ -36,6 +37,9 @@ struct Brick;
 
 #[derive(Component)]
 struct HalfSize(Vec2);
+
+#[derive(Component)]
+struct RespawnBallArea;
 
 fn main() {
     App::new()
@@ -123,6 +127,19 @@ fn startup(
         Transform::from_xyz(0.0, -CANVAS_SIZE.y * 3.0 / 8.0, 0.0),
         Paddle,
         HalfSize(DEFAULT_PADDLE_SIZE / 2.),
+    ));
+
+    commands.spawn((
+        Sprite {
+            custom_size: Some(Vec2::new(
+                CANVAS_SIZE.x,
+                CANVAS_SIZE.y / 8.0 - DEFAULT_PADDLE_SIZE.y / 2.0,
+            )),
+            color: SKY_600.into(),
+            ..default()
+        },
+        Anchor::BOTTOM_CENTER,
+        Transform::from_xyz(0.0, -CANVAS_SIZE.y / 2., -1.0),
     ));
 
     let n_rows: i32 = 6;
