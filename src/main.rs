@@ -1,17 +1,16 @@
-use std::f32::consts::{FRAC_PI_2, FRAC_PI_4, PI};
+use std::f32::consts::{FRAC_PI_4, PI};
 
 use bevy::{
     camera::ScalingMode,
     color::palettes::{
-        css::{BLACK, WHITE},
-        tailwind::{SKY_50, SKY_300, SKY_500, SKY_800, SLATE_900},
+        css::WHITE,
+        tailwind::{SKY_50, SKY_300, SKY_800, SLATE_900},
     },
     math::{
         FloatOrd,
         bounding::{Aabb2d, RayCast2d},
     },
     prelude::*,
-    tasks::tick_global_task_pools_on_main_thread,
 };
 
 const BALL_SIZE: f32 = 10.;
