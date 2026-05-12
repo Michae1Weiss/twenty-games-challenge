@@ -4,7 +4,7 @@ use bevy::{
     camera::ScalingMode,
     color::palettes::{
         css::WHITE,
-        tailwind::{SKY_50, SKY_300, SKY_600, SKY_800, SLATE_900},
+        tailwind::{SKY_50, SKY_300, SKY_600, SKY_800, SLATE_50, SLATE_900},
     },
     input::common_conditions::input_just_pressed,
     math::{
@@ -55,6 +55,13 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .init_state::<GameState>()
         .add_systems(Startup, startup)
+        .add_systems(OnEnter(GameState::Playing), spawn_new_game)
+        .add_systems(OnEnter(GameState::GameOver), show_restart_text)
+        .add_systems(
+            Update,
+            restart_game
+                .run_if(in_state(GameState::GameOver).and(input_just_pressed(KeyCode::KeyR))),
+        )
         .add_systems(
             FixedUpdate,
             (
@@ -62,12 +69,6 @@ fn main() {
                 ball_movement,
                 on_ball_intersects_respawn_area,
             ),
-        )
-        .add_systems(OnEnter(GameState::Playing), spawn_new_game)
-        .add_systems(
-            Update,
-            restart_game
-                .run_if(in_state(GameState::GameOver).and(input_just_pressed(KeyCode::KeyR))),
         )
         .run();
 }
@@ -196,6 +197,25 @@ fn spawn_new_game(
 
 fn restart_game(mut next_state: ResMut<NextState<GameState>>) {
     next_state.set(GameState::Playing);
+}
+
+fn show_restart_text(mut commands: Commands) {
+    debug!("Spawning 'Press R to Restart Game' text on the screen...");
+    commands.spawn((
+        Node {
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            width: percent(100.),
+            height: percent(100.),
+            ..default()
+        },
+        DespawnOnExit(GameState::GameOver),
+        children![
+            Text::new("Press R to Restart Game"),
+            TextFont::from_font_size(67.0),
+            TextColor(SLATE_50.into()),
+        ],
+    ));
 }
 
 fn ball_movement(
