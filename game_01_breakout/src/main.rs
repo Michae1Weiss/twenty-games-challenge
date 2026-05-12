@@ -200,7 +200,6 @@ fn restart_game(mut next_state: ResMut<NextState<GameState>>) {
 }
 
 fn show_restart_text(mut commands: Commands) {
-    debug!("Spawning 'Press R to Restart Game' text on the screen...");
     commands.spawn((
         Node {
             justify_content: JustifyContent::Center,
@@ -307,7 +306,6 @@ fn paddle_controls(
         if keys.pressed(KeyCode::KeyA)
             && transform.translation.x - half_size.0.x > -CANVAS_SIZE.x / 2.
         {
-            println!("{}", transform.translation.x);
             transform.translation.x -= PADDLE_SPEED * time.delta_secs();
         } else if keys.pressed(KeyCode::KeyD)
             && transform.translation.x + half_size.0.x < CANVAS_SIZE.x / 2.
@@ -330,7 +328,6 @@ fn on_ball_intersects_respawn_area(
         )
         .intersects(&circle)
         {
-            info!("Game Over!");
             next_state.set(GameState::GameOver);
         }
     }
