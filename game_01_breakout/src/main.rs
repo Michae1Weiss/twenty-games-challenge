@@ -8,7 +8,7 @@ use bevy::{
     },
     math::{
         FloatOrd,
-        bounding::{Aabb2d, RayCast2d},
+        bounding::{Aabb2d, BoundingCircle, IntersectsVolume, RayCast2d},
     },
     prelude::*,
     sprite::Anchor,
@@ -46,7 +46,14 @@ fn main() {
         .insert_resource(ClearColor(Color::from(SKY_300)))
         .add_plugins(DefaultPlugins)
         .add_systems(Startup, startup)
-        .add_systems(FixedUpdate, (paddle_controls, ball_movement))
+        .add_systems(
+            FixedUpdate,
+            (
+                paddle_controls,
+                ball_movement,
+                on_ball_intersects_respawn_area,
+            ),
+        )
         .run();
 }
 
@@ -140,6 +147,7 @@ fn startup(
         },
         Anchor::BOTTOM_CENTER,
         Transform::from_xyz(0.0, -CANVAS_SIZE.y / 2., -1.0),
+        RespawnBallArea,
     ));
 
     let n_rows: i32 = 6;
@@ -261,6 +269,23 @@ fn paddle_controls(
             && transform.translation.x + half_size.0.x < CANVAS_SIZE.x / 2.
         {
             transform.translation.x += PADDLE_SPEED * time.delta_secs();
+        }
+    }
+}
+
+fn on_ball_intersects_respawn_area(
+    respawn_area: Single<(&Transform, &Sprite), With<RespawnBallArea>>,
+    balls: Query<&Transform, With<Ball>>,
+) {
+    for &ball in &balls {
+        let circle = BoundingCircle::new(ball.translation.xy(), BALL_SIZE);
+        if Aabb2d::new(
+            respawn_area.0.translation.xy(),
+            respawn_area.1.custom_size.unwrap() / Vec2::splat(2.),
+        )
+        .intersects(&circle)
+        {
+            info!("Game over!");
         }
     }
 }
