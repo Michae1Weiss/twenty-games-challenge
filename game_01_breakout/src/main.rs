@@ -6,6 +6,7 @@ use bevy::{
         css::WHITE,
         tailwind::{SKY_50, SKY_300, SKY_600, SKY_800, SLATE_900},
     },
+    input::common_conditions::input_just_pressed,
     math::{
         FloatOrd,
         bounding::{Aabb2d, BoundingCircle, IntersectsVolume, RayCast2d},
@@ -19,6 +20,13 @@ const CANVAS_SIZE: Vec2 = Vec2::new(1280., 720.);
 const BRICK_SIZE: Vec2 = Vec2::new(80., 40.);
 const DEFAULT_PADDLE_SIZE: Vec2 = Vec2::new(200., 20.);
 const PADDLE_SPEED: f32 = 600.;
+
+#[derive(States, Debug, Clone, Copy, Default, Eq, PartialEq, Hash)]
+enum GameState {
+    #[default]
+    GameOver,
+    Playing,
+}
 
 #[derive(Component)]
 struct Ball;
@@ -45,6 +53,7 @@ fn main() {
     App::new()
         .insert_resource(ClearColor(Color::from(SKY_300)))
         .add_plugins(DefaultPlugins)
+        .init_state::<GameState>()
         .add_systems(Startup, startup)
         .add_systems(
             FixedUpdate,
@@ -54,14 +63,16 @@ fn main() {
                 on_ball_intersects_respawn_area,
             ),
         )
+        .add_systems(OnEnter(GameState::Playing), spawn_new_game)
+        .add_systems(
+            Update,
+            restart_game
+                .run_if(in_state(GameState::GameOver).and(input_just_pressed(KeyCode::KeyR))),
+        )
         .run();
 }
 
-fn startup(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-) {
+fn startup(mut commands: Commands) {
     commands.spawn((
         Camera2d,
         Projection::Orthographic(OrthographicProjection {
@@ -71,19 +82,6 @@ fn startup(
             },
             ..OrthographicProjection::default_2d()
         }),
-    ));
-
-    commands.spawn((
-        Ball,
-        Velocity(Vec2::new(-240., -480.)),
-        Mesh2d(meshes.add(Circle::new(BALL_SIZE))),
-        MeshMaterial2d(materials.add(Color::from(SLATE_900))),
-        Transform::from_xyz(0.0, -50.0, 0.0),
-        children![(
-            Mesh2d(meshes.add(Circle::new(BALL_SIZE - 1.0))),
-            MeshMaterial2d(materials.add(Color::from(WHITE))),
-            Transform::from_xyz(0.0, 0.0, 1.0)
-        )],
     ));
 
     commands.spawn((
@@ -127,17 +125,6 @@ fn startup(
 
     commands.spawn((
         Sprite {
-            custom_size: Some(DEFAULT_PADDLE_SIZE),
-            color: Color::from(SKY_50),
-            ..default()
-        },
-        Transform::from_xyz(0.0, -CANVAS_SIZE.y * 3.0 / 8.0, 0.0),
-        Paddle,
-        HalfSize(DEFAULT_PADDLE_SIZE / 2.),
-    ));
-
-    commands.spawn((
-        Sprite {
             custom_size: Some(Vec2::new(
                 CANVAS_SIZE.x,
                 CANVAS_SIZE.y / 8.0 - DEFAULT_PADDLE_SIZE.y / 2.0,
@@ -148,6 +135,38 @@ fn startup(
         Anchor::BOTTOM_CENTER,
         Transform::from_xyz(0.0, -CANVAS_SIZE.y / 2., -1.0),
         RespawnBallArea,
+    ));
+}
+
+fn spawn_new_game(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
+    commands.spawn((
+        Ball,
+        Velocity(Vec2::new(-20., -480.)),
+        Mesh2d(meshes.add(Circle::new(BALL_SIZE))),
+        MeshMaterial2d(materials.add(Color::from(SLATE_900))),
+        Transform::from_xyz(0.0, -50.0, 0.0),
+        DespawnOnExit(GameState::Playing),
+        children![(
+            Mesh2d(meshes.add(Circle::new(BALL_SIZE - 1.0))),
+            MeshMaterial2d(materials.add(Color::from(WHITE))),
+            Transform::from_xyz(0.0, 0.0, 1.0)
+        )],
+    ));
+
+    commands.spawn((
+        Sprite {
+            custom_size: Some(DEFAULT_PADDLE_SIZE),
+            color: Color::from(SKY_50),
+            ..default()
+        },
+        Transform::from_xyz(0.0, -CANVAS_SIZE.y * 3.0 / 8.0, 0.0),
+        Paddle,
+        HalfSize(DEFAULT_PADDLE_SIZE / 2.),
+        DespawnOnExit(GameState::Playing),
     ));
 
     let n_rows: i32 = 6;
@@ -169,9 +188,14 @@ fn startup(
                     0.0,
                 ),
                 HalfSize(BRICK_SIZE / 2.),
+                DespawnOnExit(GameState::Playing),
             ));
         }
     }
+}
+
+fn restart_game(mut next_state: ResMut<NextState<GameState>>) {
+    next_state.set(GameState::Playing);
 }
 
 fn ball_movement(
@@ -276,6 +300,7 @@ fn paddle_controls(
 fn on_ball_intersects_respawn_area(
     respawn_area: Single<(&Transform, &Sprite), With<RespawnBallArea>>,
     balls: Query<&Transform, With<Ball>>,
+    mut next_state: ResMut<NextState<GameState>>,
 ) {
     for &ball in &balls {
         let circle = BoundingCircle::new(ball.translation.xy(), BALL_SIZE);
@@ -285,7 +310,8 @@ fn on_ball_intersects_respawn_area(
         )
         .intersects(&circle)
         {
-            info!("Game over!");
+            info!("Game Over!");
+            next_state.set(GameState::GameOver);
         }
     }
 }
