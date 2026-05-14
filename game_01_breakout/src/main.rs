@@ -6,6 +6,7 @@ use bevy::{
         css::WHITE,
         tailwind::{SKY_50, SKY_300, SKY_600, SKY_800, SLATE_50, SLATE_900},
     },
+    ecs::relationship::RelationshipSourceCollection,
     input::common_conditions::input_just_pressed,
     math::{
         FloatOrd,
@@ -32,6 +33,7 @@ const PADDLE_SPEED: f32 = 600.;
 const RIBBON_SPAWN_RATE: f32 = 64.;
 const RIBBON_LIFETIME: f32 = 1.5; // Seconds
 const RIBBON_PARTICLE_CAPACITY: u32 = 100; // 64 * 1.5 = 98 or 100 (rounded)
+const BALL_SPIN_MAGNITUDE: f32 = 5.;
 
 #[derive(States, Debug, Clone, Copy, Default, Eq, PartialEq, Hash)]
 enum GameState {
@@ -52,6 +54,13 @@ struct Wall(Plane2d);
 
 #[derive(Component)]
 struct Paddle;
+
+/// Component representing a ball that curves when hit
+#[derive(Component)]
+struct Spin {
+    /// direction & magnitude of curve force
+    curve_force: Vec2,
+}
 
 #[derive(Component, Default, Debug)]
 enum PaddleMovement {
@@ -84,6 +93,8 @@ struct AudioAssets {
     pop: Handle<AudioSource>,
     #[asset(path = "sfx/ball-hits-paddle.ogg")]
     ball_hits_paddle: Handle<AudioSource>,
+    #[asset(path = "sfx/ball-hits-wall.ogg")]
+    ball_hits_wall: Handle<AudioSource>,
 }
 
 fn main() {
@@ -232,6 +243,9 @@ fn spawn_new_game(
 
     commands.spawn((
         Ball,
+        Spin {
+            curve_force: Vec2::ZERO,
+        },
         ParticleEffect::new(effect),
         Velocity(Vec2::new(-20., -390.)),
         Mesh2d(meshes.add(Circle::new(BALL_SIZE))),
@@ -308,7 +322,7 @@ fn show_restart_text(mut commands: Commands) {
 }
 
 fn ball_movement(
-    mut query: Query<(&mut Velocity, &mut Transform), With<Ball>>,
+    mut balls: Query<(&mut Velocity, &mut Transform, &mut Spin), With<Ball>>,
     walls: Query<(&Wall, &Transform), Without<Ball>>,
     aabb_colliders: Query<(Entity, &Transform, &HalfSize), Without<Ball>>,
     paddles: Query<&PaddleMovement, With<Paddle>>,
@@ -317,7 +331,8 @@ fn ball_movement(
     mut commands: Commands,
     audio_assets: Res<AudioAssets>,
 ) {
-    for (mut velocity, mut transform) in &mut query {
+    for (mut velocity, mut transform, mut spin) in &mut balls {
+        velocity.0 = velocity.0 + spin.curve_force;
         let ball_movement_this_frame = velocity.0 * time.delta_secs();
         let ball_move_distance = ball_movement_this_frame.length();
         let ball_ray = Ray2d::new(transform.translation.xy(), Dir2::new(velocity.0).unwrap());
@@ -328,6 +343,10 @@ fn ball_movement(
                 && ball_move_distance >= distance_to_wall
             {
                 velocity.0 = velocity.0.reflect(wall.0.normal.as_vec2());
+                commands.spawn((
+                    AudioPlayer::new(audio_assets.ball_hits_wall.clone()),
+                    PlaybackSettings::ONCE,
+                ));
                 return;
             }
         }
@@ -355,6 +374,14 @@ fn ball_movement(
                     AudioPlayer::new(audio_assets.ball_hits_paddle.clone()),
                     PlaybackSettings::ONCE,
                 ));
+                spin.curve_force = Vec2::new(
+                    match paddle_movement {
+                        PaddleMovement::Left => -BALL_SPIN_MAGNITUDE,
+                        PaddleMovement::Right => BALL_SPIN_MAGNITUDE,
+                        PaddleMovement::Idle => 0.0,
+                    },
+                    0.0,
+                );
                 info!("Paddle movement: {paddle_movement:?}");
             } else if bricks.get(entity).is_ok() {
                 let (hit_normal, _) = [
