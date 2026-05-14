@@ -82,6 +82,8 @@ struct TextureAssets {
 struct AudioAssets {
     #[asset(path = "sfx/pop-02.ogg")]
     pop: Handle<AudioSource>,
+    #[asset(path = "sfx/ball-hits-paddle.ogg")]
+    ball_hits_paddle: Handle<AudioSource>,
 }
 
 fn main() {
@@ -349,6 +351,10 @@ fn ball_movement(
                 let linear_angle = angle.clamp(0., PI) / PI;
                 let softened_angle = FRAC_PI_4.lerp(PI - FRAC_PI_4, linear_angle);
                 velocity.0 = Vec2::from_angle(softened_angle) * velocity.0.length();
+                commands.spawn((
+                    AudioPlayer::new(audio_assets.ball_hits_paddle.clone()),
+                    PlaybackSettings::ONCE,
+                ));
                 info!("Paddle movement: {paddle_movement:?}");
             } else if bricks.get(entity).is_ok() {
                 let (hit_normal, _) = [
