@@ -40,6 +40,14 @@ struct Wall(Plane2d);
 #[derive(Component)]
 struct Paddle;
 
+#[derive(Component, Default, Debug)]
+enum PaddleMovement {
+    Left,
+    Right,
+    #[default]
+    Idle,
+}
+
 #[derive(Component)]
 struct Brick;
 
@@ -166,6 +174,7 @@ fn spawn_new_game(
         },
         Transform::from_xyz(0.0, -CANVAS_SIZE.y * 3.0 / 8.0, 0.0),
         Paddle,
+        PaddleMovement::default(),
         HalfSize(DEFAULT_PADDLE_SIZE / 2.),
         DespawnOnExit(GameState::Playing),
     ));
@@ -221,7 +230,7 @@ fn ball_movement(
     mut query: Query<(&mut Velocity, &mut Transform), With<Ball>>,
     walls: Query<(&Wall, &Transform), Without<Ball>>,
     aabb_colliders: Query<(Entity, &Transform, &HalfSize), Without<Ball>>,
-    paddles: Query<(), With<Paddle>>,
+    paddles: Query<(&PaddleMovement), With<Paddle>>,
     bricks: Query<(), With<Brick>>,
     time: Res<Time>,
     mut commands: Commands,
@@ -254,12 +263,13 @@ fn ball_movement(
             })
             .min_by_key(|(_, _, _, distance)| FloatOrd(*distance))
         {
-            if paddles.get(entity).is_ok() {
+            if let Some(paddle_movement) = paddles.get(entity).ok() {
                 let direction_vector = transform.translation.xy() - origin.translation.xy();
                 let angle = direction_vector.to_angle();
                 let linear_angle = angle.clamp(0., PI) / PI;
                 let softened_angle = FRAC_PI_4.lerp(PI - FRAC_PI_4, linear_angle);
                 velocity.0 = Vec2::from_angle(softened_angle) * velocity.0.length();
+                info!("Paddle movement: {paddle_movement:?}");
             } else if bricks.get(entity).is_ok() {
                 let (hit_normal, _) = [
                     (
@@ -299,18 +309,22 @@ fn ball_movement(
 
 fn paddle_controls(
     keys: Res<ButtonInput<KeyCode>>,
-    mut paddles: Query<(&mut Transform, &HalfSize), With<Paddle>>,
+    mut paddles: Query<(&mut Transform, &HalfSize, &mut PaddleMovement), With<Paddle>>,
     time: Res<Time>,
 ) {
-    for (mut transform, half_size) in &mut paddles {
+    for (mut transform, half_size, mut paddle_movement) in &mut paddles {
         if keys.pressed(KeyCode::KeyA)
             && transform.translation.x - half_size.0.x > -CANVAS_SIZE.x / 2.
         {
+            *paddle_movement = PaddleMovement::Left;
             transform.translation.x -= PADDLE_SPEED * time.delta_secs();
         } else if keys.pressed(KeyCode::KeyD)
             && transform.translation.x + half_size.0.x < CANVAS_SIZE.x / 2.
         {
+            *paddle_movement = PaddleMovement::Right;
             transform.translation.x += PADDLE_SPEED * time.delta_secs();
+        } else {
+            *paddle_movement = PaddleMovement::Idle;
         }
     }
 }
