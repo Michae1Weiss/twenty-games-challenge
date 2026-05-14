@@ -1,7 +1,6 @@
 use std::f32::consts::{FRAC_PI_4, PI};
 
 use bevy::{
-    app::FixedMain,
     camera::ScalingMode,
     color::palettes::{
         css::WHITE,
@@ -24,7 +23,7 @@ const BALL_SIZE: f32 = 10.;
 const CANVAS_SIZE: Vec2 = Vec2::new(1280., 720.);
 const BRICK_SIZE: Vec2 = Vec2::new(80., 40.);
 const DEFAULT_PADDLE_SIZE: Vec2 = Vec2::new(200., 20.);
-const PADDLE_SPEED: f32 = 1000.;
+const PADDLE_SPEED: f32 = 600.;
 // Ribbon trail effect constants
 const RIBBON_SPAWN_RATE: f32 = 64.;
 const RIBBON_LIFETIME: f32 = 1.5; // Seconds
@@ -279,7 +278,7 @@ fn ball_movement(
     mut query: Query<(&mut Velocity, &mut Transform), With<Ball>>,
     walls: Query<(&Wall, &Transform), Without<Ball>>,
     aabb_colliders: Query<(Entity, &Transform, &HalfSize), Without<Ball>>,
-    paddles: Query<(&PaddleMovement), With<Paddle>>,
+    paddles: Query<&PaddleMovement, With<Paddle>>,
     bricks: Query<(), With<Brick>>,
     time: Res<Time>,
     mut commands: Commands,
