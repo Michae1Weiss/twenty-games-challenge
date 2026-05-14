@@ -14,6 +14,7 @@ use bevy::{
     prelude::*,
     sprite::Anchor,
 };
+use bevy_asset_loader::asset_collection::AssetCollection;
 use bevy_hanabi::{
     Attribute, ColorOverLifetimeModifier, EffectAsset, ExprWriter, HanabiPlugin, ParticleEffect,
     SetAttributeModifier, SizeOverLifetimeModifier, SpawnerSettings,
@@ -22,7 +23,7 @@ use bevy_hanabi::{
 const BALL_SIZE: f32 = 10.;
 const CANVAS_SIZE: Vec2 = Vec2::new(1280., 720.);
 const BRICK_SIZE: Vec2 = Vec2::new(80., 40.);
-const DEFAULT_PADDLE_SIZE: Vec2 = Vec2::new(200., 20.);
+const DEFAULT_PADDLE_SIZE: Vec2 = Vec2::new(200., 25.);
 const PADDLE_SPEED: f32 = 600.;
 // Ribbon trail effect constants
 const RIBBON_SPAWN_RATE: f32 = 64.;
@@ -64,6 +65,12 @@ struct HalfSize(Vec2);
 
 #[derive(Component)]
 struct RespawnBallArea;
+
+#[derive(AssetCollection, Resource)]
+struct SpriteAssets {
+    #[asset(path = "assets/sprites/paddle.png")]
+    paddle: Handle<Image>,
+}
 
 fn main() {
     App::new()
