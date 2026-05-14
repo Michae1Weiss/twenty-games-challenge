@@ -14,7 +14,10 @@ use bevy::{
     prelude::*,
     sprite::Anchor,
 };
-use bevy_asset_loader::asset_collection::AssetCollection;
+use bevy_asset_loader::{
+    asset_collection::AssetCollection,
+    loading_state::{LoadingState, LoadingStateAppExt, config::ConfigureLoadingState},
+};
 use bevy_hanabi::{
     Attribute, ColorOverLifetimeModifier, EffectAsset, ExprWriter, HanabiPlugin, ParticleEffect,
     SetAttributeModifier, SizeOverLifetimeModifier, SpawnerSettings,
@@ -33,6 +36,7 @@ const RIBBON_PARTICLE_CAPACITY: u32 = 100; // 64 * 1.5 = 98 or 100 (rounded)
 #[derive(States, Debug, Clone, Copy, Default, Eq, PartialEq, Hash)]
 enum GameState {
     #[default]
+    AssetLoading,
     GameOver,
     Playing,
 }
@@ -67,9 +71,11 @@ struct HalfSize(Vec2);
 struct RespawnBallArea;
 
 #[derive(AssetCollection, Resource)]
-struct SpriteAssets {
-    #[asset(path = "assets/sprites/paddle.png")]
+struct TextureAssets {
+    #[asset(path = "textures/paddle.png")]
     paddle: Handle<Image>,
+    #[asset(path = "textures/brick.png")]
+    brick: Handle<Image>,
 }
 
 fn main() {
@@ -78,6 +84,11 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugins(HanabiPlugin)
         .init_state::<GameState>()
+        .add_loading_state(
+            LoadingState::new(GameState::AssetLoading)
+                .continue_to_state(GameState::GameOver)
+                .load_collection::<TextureAssets>(),
+        )
         .add_systems(Startup, startup)
         .add_systems(OnEnter(GameState::Playing), spawn_new_game)
         .add_systems(OnEnter(GameState::GameOver), show_restart_text)
@@ -175,8 +186,8 @@ fn build_ribbon_effect() -> EffectAsset {
     let init_ribbon_id = SetAttributeModifier::new(Attribute::RIBBON_ID, writer.lit(0u32).expr());
 
     let color_over_time_modifier = ColorOverLifetimeModifier::new(bevy_hanabi::Gradient::linear(
-        Vec4::new(1.0, 0., 0., 1.),
-        Vec4::new(1.0, 0., 0., 0.),
+        Vec4::new(1.0, 1., 1., 1.),
+        Vec4::new(1.0, 1., 1., 0.),
     ));
 
     let size_over_time_modifier = SizeOverLifetimeModifier {
@@ -202,6 +213,7 @@ fn spawn_new_game(
     mut effects: ResMut<Assets<EffectAsset>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
+    texture_assets: Res<TextureAssets>,
 ) {
     let effect = build_ribbon_effect();
     let effect = effects.add(effect);
@@ -223,8 +235,9 @@ fn spawn_new_game(
 
     commands.spawn((
         Sprite {
+            image: texture_assets.paddle.clone(),
             custom_size: Some(DEFAULT_PADDLE_SIZE),
-            color: Color::from(SKY_50),
+            // color: Color::from(SKY_50),
             ..default()
         },
         Transform::from_xyz(0.0, -CANVAS_SIZE.y * 3.0 / 8.0, 0.0),
@@ -243,8 +256,9 @@ fn spawn_new_game(
             commands.spawn((
                 Brick,
                 Sprite {
+                    image: texture_assets.brick.clone(),
                     custom_size: Some(BRICK_SIZE),
-                    color: base_color.into(),
+                    // color: base_color.into(),
                     ..default()
                 },
                 Transform::from_xyz(
