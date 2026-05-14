@@ -1,6 +1,7 @@
 use std::f32::consts::{FRAC_PI_4, PI};
 
 use bevy::{
+    app::FixedMain,
     camera::ScalingMode,
     color::palettes::{
         css::WHITE,
@@ -14,12 +15,20 @@ use bevy::{
     prelude::*,
     sprite::Anchor,
 };
+use bevy_hanabi::{
+    Attribute, ColorOverLifetimeModifier, EffectAsset, ExprWriter, HanabiPlugin, ParticleEffect,
+    SetAttributeModifier, SizeOverLifetimeModifier, SpawnerSettings,
+};
 
 const BALL_SIZE: f32 = 10.;
 const CANVAS_SIZE: Vec2 = Vec2::new(1280., 720.);
 const BRICK_SIZE: Vec2 = Vec2::new(80., 40.);
 const DEFAULT_PADDLE_SIZE: Vec2 = Vec2::new(200., 20.);
-const PADDLE_SPEED: f32 = 600.;
+const PADDLE_SPEED: f32 = 1000.;
+// Ribbon trail effect constants
+const RIBBON_SPAWN_RATE: f32 = 64.;
+const RIBBON_LIFETIME: f32 = 1.5; // Seconds
+const RIBBON_PARTICLE_CAPACITY: u32 = 100; // 64 * 1.5 = 98 or 100 (rounded)
 
 #[derive(States, Debug, Clone, Copy, Default, Eq, PartialEq, Hash)]
 enum GameState {
@@ -61,6 +70,7 @@ fn main() {
     App::new()
         .insert_resource(ClearColor(Color::from(SKY_300)))
         .add_plugins(DefaultPlugins)
+        .add_plugins(HanabiPlugin)
         .init_state::<GameState>()
         .add_systems(Startup, startup)
         .add_systems(OnEnter(GameState::Playing), spawn_new_game)
@@ -147,14 +157,53 @@ fn startup(mut commands: Commands) {
     ));
 }
 
+fn build_ribbon_effect() -> EffectAsset {
+    let writer = ExprWriter::new();
+
+    let init_pos_attr =
+        SetAttributeModifier::new(Attribute::POSITION, writer.lit(Vec3::ZERO).expr());
+    let init_age_attr = SetAttributeModifier::new(Attribute::AGE, writer.lit(0.0).expr());
+    let init_lifetime_attr =
+        SetAttributeModifier::new(Attribute::LIFETIME, writer.lit(RIBBON_LIFETIME).expr());
+    let init_size_attr = SetAttributeModifier::new(Attribute::SIZE, writer.lit(0.5).expr());
+    let init_ribbon_id = SetAttributeModifier::new(Attribute::RIBBON_ID, writer.lit(0u32).expr());
+
+    let color_over_time_modifier = ColorOverLifetimeModifier::new(bevy_hanabi::Gradient::linear(
+        Vec4::new(1.0, 0., 0., 1.),
+        Vec4::new(1.0, 0., 0., 0.),
+    ));
+
+    let size_over_time_modifier = SizeOverLifetimeModifier {
+        gradient: bevy_hanabi::Gradient::linear(Vec3::splat(10.0), Vec3::ZERO),
+        ..default()
+    };
+    let spawner = SpawnerSettings::rate(RIBBON_SPAWN_RATE.into());
+
+    EffectAsset::new(RIBBON_PARTICLE_CAPACITY, spawner, writer.finish())
+        .with_motion_integration(bevy_hanabi::MotionIntegration::None)
+        .with_simulation_space(bevy_hanabi::SimulationSpace::Global)
+        .init(init_pos_attr)
+        .init(init_age_attr)
+        .init(init_lifetime_attr)
+        .init(init_size_attr)
+        .init(init_ribbon_id)
+        .render(color_over_time_modifier)
+        .render(size_over_time_modifier)
+}
+
 fn spawn_new_game(
     mut commands: Commands,
+    mut effects: ResMut<Assets<EffectAsset>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
+    let effect = build_ribbon_effect();
+    let effect = effects.add(effect);
+
     commands.spawn((
         Ball,
-        Velocity(Vec2::new(-20., -480.)),
+        ParticleEffect::new(effect),
+        Velocity(Vec2::new(-20., -390.)),
         Mesh2d(meshes.add(Circle::new(BALL_SIZE))),
         MeshMaterial2d(materials.add(Color::from(SLATE_900))),
         Transform::from_xyz(0.0, -50.0, 0.0),

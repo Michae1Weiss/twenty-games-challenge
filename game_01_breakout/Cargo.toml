@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [features]
-dev = ["bevy/dynamic_linking"]
+dev = ["bevy/dynamic_linking", "bevy/debug"]
 
 [dependencies]
 bevy = { workspace = true }
