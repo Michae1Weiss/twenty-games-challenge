@@ -78,6 +78,12 @@ struct TextureAssets {
     brick: Handle<Image>,
 }
 
+#[derive(AssetCollection, Resource)]
+struct AudioAssets {
+    #[asset(path = "sfx/pop-02.ogg")]
+    pop: Handle<AudioSource>,
+}
+
 fn main() {
     App::new()
         .insert_resource(ClearColor(Color::from(SKY_300)))
@@ -85,9 +91,12 @@ fn main() {
         .add_plugins(HanabiPlugin)
         .init_state::<GameState>()
         .add_loading_state(
+            // See: https://github.com/NiklasEi/bevy_asset_loader/blob/HEAD/bevy_asset_loader/examples/two_collections.rs
+            // Also: https://github.com/NiklasEi/bevy_asset_loader/blob/74c74fabc4223eb734543739e9332c59c444f57f/bevy_asset_loader/examples/two_collections.rs#L15
             LoadingState::new(GameState::AssetLoading)
                 .continue_to_state(GameState::GameOver)
-                .load_collection::<TextureAssets>(),
+                .load_collection::<TextureAssets>()
+                .load_collection::<AudioAssets>(),
         )
         .add_systems(Startup, startup)
         .add_systems(OnEnter(GameState::Playing), spawn_new_game)
@@ -103,7 +112,8 @@ fn main() {
                 paddle_controls,
                 ball_movement,
                 on_ball_intersects_respawn_area,
-            ),
+            )
+                .run_if(in_state(GameState::Playing)),
         )
         .run();
 }
@@ -303,6 +313,7 @@ fn ball_movement(
     bricks: Query<(), With<Brick>>,
     time: Res<Time>,
     mut commands: Commands,
+    audio_assets: Res<AudioAssets>,
 ) {
     for (mut velocity, mut transform) in &mut query {
         let ball_movement_this_frame = velocity.0 * time.delta_secs();
@@ -366,6 +377,10 @@ fn ball_movement(
                 })
                 .min_by_key(|(_, hit_distance)| FloatOrd(*hit_distance))
                 .unwrap();
+                commands.spawn((
+                    AudioPlayer::new(audio_assets.pop.clone()),
+                    PlaybackSettings::ONCE,
+                ));
                 commands.entity(entity).despawn();
                 velocity.0 = velocity.0.reflect(hit_normal.into());
             }
