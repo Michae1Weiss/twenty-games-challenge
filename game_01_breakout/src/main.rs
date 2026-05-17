@@ -1,4 +1,4 @@
-use std::f32::consts::{FRAC_PI_4, PI};
+use std::f32::consts::{FRAC_PI_6, PI};
 
 use bevy::{
     camera::ScalingMode,
@@ -6,7 +6,6 @@ use bevy::{
         css::WHITE,
         tailwind::{SKY_50, SKY_300, SKY_600, SKY_800, SLATE_50, SLATE_900},
     },
-    ecs::relationship::RelationshipSourceCollection,
     input::common_conditions::input_just_pressed,
     math::{
         FloatOrd,
@@ -34,7 +33,6 @@ const RIBBON_SPAWN_RATE: f32 = 64.;
 const RIBBON_LIFETIME: f32 = 1.5; // Seconds
 const RIBBON_PARTICLE_CAPACITY: u32 = 100; // 64 * 1.5 = 98 or 100 (rounded)
 const BALL_SPIN_MAGNITUDE: f32 = 0.005; // radian/sec
-const BALL_SPEED_BOOST: f32 = 100.;
 
 #[derive(States, Debug, Clone, Copy, Default, Eq, PartialEq, Hash)]
 enum GameState {
@@ -61,7 +59,6 @@ struct Paddle;
 struct Spin {
     /// direction & magnitude of curve force
     curve_force: f32,
-    speed_boost: f32,
 }
 
 #[derive(Component, Default, Debug)]
@@ -245,12 +242,9 @@ fn spawn_new_game(
 
     commands.spawn((
         Ball,
-        Spin {
-            curve_force: 0.0,
-            speed_boost: 0.0,
-        },
+        Spin { curve_force: 0.0 },
         ParticleEffect::new(effect),
-        Velocity(Vec2::new(-20., -450.)),
+        Velocity(Vec2::new(-20., -480.)),
         Mesh2d(meshes.add(Circle::new(BALL_SIZE))),
         MeshMaterial2d(materials.add(Color::from(SLATE_900))),
         Transform::from_xyz(0.0, -50.0, 0.0),
@@ -266,7 +260,6 @@ fn spawn_new_game(
         Sprite {
             image: texture_assets.paddle.clone(),
             custom_size: Some(DEFAULT_PADDLE_SIZE),
-            // color: Color::from(SKY_50),
             ..default()
         },
         Transform::from_xyz(0.0, -CANVAS_SIZE.y * 3.0 / 8.0, 0.0),
@@ -278,7 +271,6 @@ fn spawn_new_game(
 
     let n_rows: i32 = 6;
     let n_columns: i32 = 13;
-    let base_color = Oklcha::from(SKY_300);
 
     for row in 0..n_rows {
         for column in 0..n_columns {
@@ -287,7 +279,6 @@ fn spawn_new_game(
                 Sprite {
                     image: texture_assets.brick.clone(),
                     custom_size: Some(BRICK_SIZE),
-                    // color: base_color.into(),
                     ..default()
                 },
                 Transform::from_xyz(
@@ -351,7 +342,6 @@ fn ball_movement(
                     PlaybackSettings::ONCE,
                 ));
                 spin.curve_force = 0.0;
-                spin.speed_boost = 0.0;
                 return;
             }
         }
@@ -373,7 +363,7 @@ fn ball_movement(
                 let direction_vector = transform.translation.xy() - origin.translation.xy();
                 let angle = direction_vector.to_angle();
                 let linear_angle = angle.clamp(0., PI) / PI;
-                let softened_angle = FRAC_PI_4.lerp(PI - FRAC_PI_4, linear_angle);
+                let softened_angle = FRAC_PI_6.lerp(PI - FRAC_PI_6, linear_angle);
                 velocity.0 = Vec2::from_angle(softened_angle) * velocity.0.length();
                 commands.spawn((
                     AudioPlayer::new(audio_assets.ball_hits_paddle.clone()),
@@ -384,7 +374,6 @@ fn ball_movement(
                     PaddleMovement::Right => BALL_SPIN_MAGNITUDE,
                     PaddleMovement::Idle => 0.0,
                 };
-                spin.speed_boost = BALL_SPEED_BOOST;
 
                 info!("Paddle movement: {paddle_movement:?}");
             } else if bricks.get(entity).is_ok() {
