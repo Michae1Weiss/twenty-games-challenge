@@ -33,7 +33,8 @@ const PADDLE_SPEED: f32 = 600.;
 const RIBBON_SPAWN_RATE: f32 = 64.;
 const RIBBON_LIFETIME: f32 = 1.5; // Seconds
 const RIBBON_PARTICLE_CAPACITY: u32 = 100; // 64 * 1.5 = 98 or 100 (rounded)
-const BALL_SPIN_MAGNITUDE: f32 = 5.;
+const BALL_SPIN_MAGNITUDE: f32 = 0.005; // radian/sec
+const BALL_SPEED_BOOST: f32 = 100.;
 
 #[derive(States, Debug, Clone, Copy, Default, Eq, PartialEq, Hash)]
 enum GameState {
@@ -59,7 +60,8 @@ struct Paddle;
 #[derive(Component)]
 struct Spin {
     /// direction & magnitude of curve force
-    curve_force: Vec2,
+    curve_force: f32,
+    speed_boost: f32,
 }
 
 #[derive(Component, Default, Debug)]
@@ -244,10 +246,11 @@ fn spawn_new_game(
     commands.spawn((
         Ball,
         Spin {
-            curve_force: Vec2::ZERO,
+            curve_force: 0.0,
+            speed_boost: 0.0,
         },
         ParticleEffect::new(effect),
-        Velocity(Vec2::new(-20., -390.)),
+        Velocity(Vec2::new(-20., -450.)),
         Mesh2d(meshes.add(Circle::new(BALL_SIZE))),
         MeshMaterial2d(materials.add(Color::from(SLATE_900))),
         Transform::from_xyz(0.0, -50.0, 0.0),
@@ -332,7 +335,7 @@ fn ball_movement(
     audio_assets: Res<AudioAssets>,
 ) {
     for (mut velocity, mut transform, mut spin) in &mut balls {
-        velocity.0 = velocity.0 + spin.curve_force;
+        velocity.0 = Vec2::from_angle(spin.curve_force).rotate(velocity.0);
         let ball_movement_this_frame = velocity.0 * time.delta_secs();
         let ball_move_distance = ball_movement_this_frame.length();
         let ball_ray = Ray2d::new(transform.translation.xy(), Dir2::new(velocity.0).unwrap());
@@ -347,6 +350,8 @@ fn ball_movement(
                     AudioPlayer::new(audio_assets.ball_hits_wall.clone()),
                     PlaybackSettings::ONCE,
                 ));
+                spin.curve_force = 0.0;
+                spin.speed_boost = 0.0;
                 return;
             }
         }
@@ -374,14 +379,13 @@ fn ball_movement(
                     AudioPlayer::new(audio_assets.ball_hits_paddle.clone()),
                     PlaybackSettings::ONCE,
                 ));
-                spin.curve_force = Vec2::new(
-                    match paddle_movement {
-                        PaddleMovement::Left => -BALL_SPIN_MAGNITUDE,
-                        PaddleMovement::Right => BALL_SPIN_MAGNITUDE,
-                        PaddleMovement::Idle => 0.0,
-                    },
-                    0.0,
-                );
+                spin.curve_force = match paddle_movement {
+                    PaddleMovement::Left => -BALL_SPIN_MAGNITUDE,
+                    PaddleMovement::Right => BALL_SPIN_MAGNITUDE,
+                    PaddleMovement::Idle => 0.0,
+                };
+                spin.speed_boost = BALL_SPEED_BOOST;
+
                 info!("Paddle movement: {paddle_movement:?}");
             } else if bricks.get(entity).is_ok() {
                 let (hit_normal, _) = [
@@ -415,7 +419,9 @@ fn ball_movement(
                     PlaybackSettings::ONCE,
                 ));
                 commands.entity(entity).despawn();
-                velocity.0 = velocity.0.reflect(hit_normal.into());
+                if spin.curve_force == 0.0 {
+                    velocity.0 = velocity.0.reflect(hit_normal.into());
+                }
             }
             break;
         }
