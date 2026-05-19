@@ -1,0 +1,14 @@
+[package]
+name = "game_01_breakout"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+dev = ["bevy/dynamic_linking", "bevy/debug"]
+
+[dependencies]
+bevy = { workspace = true }
+bevy_hanabi = { workspace = true }
+bevy_asset_loader = { workspace = true }
+# rand = { workspace = true }
+# rand_chacha = { workspace = true }

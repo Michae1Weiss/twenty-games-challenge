@@ -1,0 +1,31 @@
+[keys.insert]
+"A-down" = ["normal_mode", "extend_to_line_bounds", "delete_selection", "paste_after", "insert_mode"]  # Move line down
+"A-up" = ["normal_mode", "extend_to_line_bounds", "delete_selection", "move_line_up", "paste_before", "insert_mode"]  # Move line up
+
+[keys.normal]
+"A-j" = [
+  "extend_to_line_bounds",
+  "delete_selection",
+  "paste_after",
+  "select_mode",
+  "goto_line_start",
+  "normal_mode",
+] # Move line(s) down
+"A-k" = [
+  "extend_to_line_bounds",
+  "delete_selection",
+  "move_line_up",
+  "paste_before",
+  "flip_selections",
+  "goto_line_start",
+  "normal_mode",
+] # Move line(s)
+
+[editor.file-picker]
+hidden = false
+
+[editor.auto-save]
+after-delay.enable = true
+
+[editor]
+bufferline = "always" 
