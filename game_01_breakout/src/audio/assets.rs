@@ -3,6 +3,10 @@ use bevy_asset_loader::asset_collection::AssetCollection;
 
 #[derive(AssetCollection, Resource)]
 pub struct AudioAssets {
+    // Music
+    #[asset(path = "music/game-music.ogg")]
+    pub game_music: Handle<AudioSource>,
+    // SFX
     #[asset(path = "sfx/pop-02.ogg")]
     pub pop: Handle<AudioSource>,
     #[asset(path = "sfx/ball-hits-paddle.ogg")]

@@ -1,5 +1,7 @@
 use bevy::{audio::Volume, prelude::*};
 
+use crate::state::GameState;
+
 use super::{Sfx, assets::AudioAssets};
 
 #[derive(Message)]
@@ -10,7 +12,10 @@ pub enum PlaySfx {
 }
 
 pub(super) fn plugin(app: &mut App) {
-    app.add_message::<PlaySfx>().add_systems(Update, play_sfx);
+    app.add_message::<PlaySfx>().add_systems(
+        Update,
+        play_sfx.run_if(not(in_state(GameState::AssetLoading))),
+    );
 }
 
 fn play_sfx(

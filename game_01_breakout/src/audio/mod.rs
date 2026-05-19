@@ -1,11 +1,18 @@
 use bevy::prelude::*;
+use bevy_asset_loader::loading_state::{
+    LoadingStateAppExt,
+    config::{ConfigureLoadingState, LoadingStateConfig},
+};
 
-pub mod assets;
+mod assets;
 mod music;
 mod settings;
 pub mod sfx;
 
+use assets::AudioAssets;
 pub use sfx::PlaySfx;
+
+use crate::state::GameState;
 
 #[derive(Component)]
 struct Sfx;
@@ -14,5 +21,8 @@ struct Sfx;
 struct Music;
 
 pub(super) fn plugin(app: &mut App) {
-    app.add_plugins(sfx::plugin);
+    app.configure_loading_state(
+        LoadingStateConfig::new(GameState::AssetLoading).load_collection::<AudioAssets>(),
+    )
+    .add_plugins((sfx::plugin, music::plugin));
 }

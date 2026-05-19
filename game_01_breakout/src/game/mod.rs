@@ -1,4 +1,5 @@
-use bevy::app::App;
+use bevy::prelude::*;
+use bevy_asset_loader::prelude::*;
 
 use std::f32::consts::{FRAC_PI_6, PI};
 
@@ -13,7 +14,6 @@ use bevy::{
         FloatOrd,
         bounding::{Aabb2d, BoundingCircle, IntersectsVolume, RayCast2d},
     },
-    prelude::*,
     sprite::Anchor,
 };
 use bevy_hanabi::prelude::*;
@@ -26,27 +26,27 @@ mod physics;
 use crate::{audio::PlaySfx, game::assets::TextureAssets, state::GameState};
 
 pub(crate) fn plugin(app: &mut App) {
-    app.insert_resource(ClearColor(Color::from(SKY_300)))
-        .add_plugins(DefaultPlugins)
-        .add_plugins(HanabiPlugin)
-        .init_state::<GameState>()
-        .add_systems(Startup, startup)
-        .add_systems(OnEnter(GameState::Playing), spawn_new_game)
-        .add_systems(OnEnter(GameState::GameOver), show_restart_text)
-        .add_systems(
-            Update,
-            restart_game
-                .run_if(in_state(GameState::GameOver).and(input_just_pressed(KeyCode::KeyR))),
+    app.configure_loading_state(
+        LoadingStateConfig::new(GameState::AssetLoading).load_collection::<TextureAssets>(),
+    )
+    .insert_resource(ClearColor(Color::from(SKY_300)))
+    .add_plugins(HanabiPlugin)
+    .add_systems(Startup, startup)
+    .add_systems(OnEnter(GameState::Playing), spawn_new_game)
+    .add_systems(OnEnter(GameState::GameOver), show_restart_text)
+    .add_systems(
+        Update,
+        restart_game.run_if(in_state(GameState::GameOver).and(input_just_pressed(KeyCode::KeyR))),
+    )
+    .add_systems(
+        FixedUpdate,
+        (
+            paddle_controls,
+            ball_movement,
+            on_ball_intersects_respawn_area,
         )
-        .add_systems(
-            FixedUpdate,
-            (
-                paddle_controls,
-                ball_movement,
-                on_ball_intersects_respawn_area,
-            )
-                .run_if(in_state(GameState::Playing)),
-        );
+            .run_if(in_state(GameState::Playing)),
+    );
 }
 
 const BALL_SIZE: f32 = 10.;

@@ -1,0 +1,21 @@
+use bevy::{audio::Volume, prelude::*};
+
+use crate::{
+    audio::{Music, assets::AudioAssets},
+    state::GameState,
+};
+
+pub(super) fn plugin(app: &mut App) {
+    app.add_systems(OnEnter(GameState::Playing), play_game_music);
+}
+
+fn play_game_music(mut commands: Commands, audio_assets: Res<AudioAssets>) {
+    commands.spawn((
+        AudioPlayer::new(audio_assets.game_music.clone()),
+        PlaybackSettings::LOOP.with_volume(Volume::Linear(0.4)),
+        Music,
+        DespawnOnExit(GameState::Playing),
+    ));
+}
+
+fn play_menu_music() {}
