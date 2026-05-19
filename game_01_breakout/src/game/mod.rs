@@ -1,5 +1,10 @@
 use bevy::app::App;
 
+pub mod assets;
+mod camera;
+mod input;
+mod physics;
+
 use std::f32::consts::{FRAC_PI_6, PI};
 
 use bevy::{
@@ -25,19 +30,13 @@ use bevy_hanabi::{
     SetAttributeModifier, SizeOverLifetimeModifier, SpawnerSettings,
 };
 
+use crate::{game::assets::TextureAssets, state::GameState};
+
 pub(crate) fn plugin(app: &mut App) {
     app.insert_resource(ClearColor(Color::from(SKY_300)))
         .add_plugins(DefaultPlugins)
         .add_plugins(HanabiPlugin)
         .init_state::<GameState>()
-        .add_loading_state(
-            // See: https://github.com/NiklasEi/bevy_asset_loader/blob/HEAD/bevy_asset_loader/examples/two_collections.rs
-            // Also: https://github.com/NiklasEi/bevy_asset_loader/blob/74c74fabc4223eb734543739e9332c59c444f57f/bevy_asset_loader/examples/two_collections.rs#L15
-            LoadingState::new(GameState::AssetLoading)
-                .continue_to_state(GameState::GameOver)
-                .load_collection::<TextureAssets>()
-                .load_collection::<AudioAssets>(),
-        )
         .add_systems(Startup, startup)
         .add_systems(OnEnter(GameState::Playing), spawn_new_game)
         .add_systems(OnEnter(GameState::GameOver), show_restart_text)
@@ -67,14 +66,6 @@ const RIBBON_SPAWN_RATE: f32 = 64.;
 const RIBBON_LIFETIME: f32 = 1.5; // Seconds
 const RIBBON_PARTICLE_CAPACITY: u32 = 100; // 64 * 1.5 = 98 or 100 (rounded)
 const BALL_SPIN_MAGNITUDE: f32 = 0.005; // radian/sec
-
-#[derive(States, Debug, Clone, Copy, Default, Eq, PartialEq, Hash)]
-enum GameState {
-    #[default]
-    AssetLoading,
-    GameOver,
-    Playing,
-}
 
 #[derive(Component)]
 struct Ball;
@@ -112,38 +103,12 @@ struct HalfSize(Vec2);
 #[derive(Component)]
 struct RespawnBallArea;
 
-#[derive(AssetCollection, Resource)]
-struct TextureAssets {
-    #[asset(path = "textures/paddle.png")]
-    paddle: Handle<Image>,
-    #[asset(path = "textures/brick.png")]
-    brick: Handle<Image>,
-}
-
-#[derive(AssetCollection, Resource)]
-struct AudioAssets {
-    #[asset(path = "sfx/pop-02.ogg")]
-    pop: Handle<AudioSource>,
-    #[asset(path = "sfx/ball-hits-paddle.ogg")]
-    ball_hits_paddle: Handle<AudioSource>,
-    #[asset(path = "sfx/ball-hits-wall.ogg")]
-    ball_hits_wall: Handle<AudioSource>,
-}
-
 fn main() {
     App::new()
         .insert_resource(ClearColor(Color::from(SKY_300)))
         .add_plugins(DefaultPlugins)
         .add_plugins(HanabiPlugin)
         .init_state::<GameState>()
-        .add_loading_state(
-            // See: https://github.com/NiklasEi/bevy_asset_loader/blob/HEAD/bevy_asset_loader/examples/two_collections.rs
-            // Also: https://github.com/NiklasEi/bevy_asset_loader/blob/74c74fabc4223eb734543739e9332c59c444f57f/bevy_asset_loader/examples/two_collections.rs#L15
-            LoadingState::new(GameState::AssetLoading)
-                .continue_to_state(GameState::GameOver)
-                .load_collection::<TextureAssets>()
-                .load_collection::<AudioAssets>(),
-        )
         .add_systems(Startup, startup)
         .add_systems(OnEnter(GameState::Playing), spawn_new_game)
         .add_systems(OnEnter(GameState::GameOver), show_restart_text)
