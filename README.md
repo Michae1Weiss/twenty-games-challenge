@@ -14,11 +14,7 @@ cargo dev -p game_01_breakout
 # Linux
 ffmpeg -i input.mp3 -c:a libvorbis -q:a 4 output.ogg --enable-libvorbis
 # macOS
-brew install ffmpeg-full
+brew install ffmpeg
 # Example (macOS)
-ffmpeg -i game_01_breakout/audio-source/music/game-music.mp3 \
-  -c:a libopus -b:a 128k \
-  game_01_breakout/assets/music/game-music.ogg
-
 ffmpeg -i game_01_breakout/audio-source/music/game-music.mp3 -c:a vorbis -strict -2 -q:a 4 game_01_breakout/assets/music/game-music.ogg
 ```

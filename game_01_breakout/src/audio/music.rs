@@ -17,5 +17,3 @@ fn play_game_music(mut commands: Commands, audio_assets: Res<AudioAssets>) {
         DespawnOnExit(GameState::Playing),
     ));
 }
-
-fn play_menu_music() {}

@@ -1,8 +1,4 @@
 use bevy::prelude::*;
-use bevy_asset_loader::prelude::*;
-
-use std::f32::consts::{FRAC_PI_6, PI};
-
 use bevy::{
     camera::ScalingMode,
     color::palettes::{
@@ -16,7 +12,9 @@ use bevy::{
     },
     sprite::Anchor,
 };
+use bevy_asset_loader::prelude::*;
 use bevy_hanabi::prelude::*;
+use std::f32::consts::{FRAC_PI_6, PI};
 
 pub mod assets;
 mod camera;

@@ -1,8 +1,5 @@
 use bevy::prelude::*;
-use bevy_asset_loader::loading_state::{
-    LoadingStateAppExt,
-    config::{ConfigureLoadingState, LoadingStateConfig},
-};
+use bevy_asset_loader::prelude::*;
 
 mod assets;
 mod music;
