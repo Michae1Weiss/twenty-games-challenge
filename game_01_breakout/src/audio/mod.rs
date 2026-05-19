@@ -1,8 +1,18 @@
-use bevy::app::App;
+use bevy::prelude::*;
 
 pub mod assets;
 mod music;
 mod settings;
-mod sfx;
+pub mod sfx;
 
-pub(super) fn plugin(app: &mut App) {}
+pub use sfx::PlaySfx;
+
+#[derive(Component)]
+struct Sfx;
+
+#[derive(Component)]
+struct Music;
+
+pub(super) fn plugin(app: &mut App) {
+    app.add_plugins(sfx::plugin);
+}

@@ -1,10 +1,5 @@
 use bevy::app::App;
 
-pub mod assets;
-mod camera;
-mod input;
-mod physics;
-
 use std::f32::consts::{FRAC_PI_6, PI};
 
 use bevy::{
@@ -21,16 +16,14 @@ use bevy::{
     prelude::*,
     sprite::Anchor,
 };
-use bevy_asset_loader::{
-    asset_collection::AssetCollection,
-    loading_state::{LoadingState, LoadingStateAppExt, config::ConfigureLoadingState},
-};
-use bevy_hanabi::{
-    Attribute, ColorOverLifetimeModifier, EffectAsset, ExprWriter, HanabiPlugin, ParticleEffect,
-    SetAttributeModifier, SizeOverLifetimeModifier, SpawnerSettings,
-};
+use bevy_hanabi::prelude::*;
 
-use crate::{game::assets::TextureAssets, state::GameState};
+pub mod assets;
+mod camera;
+mod input;
+mod physics;
+
+use crate::{audio::PlaySfx, game::assets::TextureAssets, state::GameState};
 
 pub(crate) fn plugin(app: &mut App) {
     app.insert_resource(ClearColor(Color::from(SKY_300)))
@@ -102,32 +95,6 @@ struct HalfSize(Vec2);
 
 #[derive(Component)]
 struct RespawnBallArea;
-
-fn main() {
-    App::new()
-        .insert_resource(ClearColor(Color::from(SKY_300)))
-        .add_plugins(DefaultPlugins)
-        .add_plugins(HanabiPlugin)
-        .init_state::<GameState>()
-        .add_systems(Startup, startup)
-        .add_systems(OnEnter(GameState::Playing), spawn_new_game)
-        .add_systems(OnEnter(GameState::GameOver), show_restart_text)
-        .add_systems(
-            Update,
-            restart_game
-                .run_if(in_state(GameState::GameOver).and(input_just_pressed(KeyCode::KeyR))),
-        )
-        .add_systems(
-            FixedUpdate,
-            (
-                paddle_controls,
-                ball_movement,
-                on_ball_intersects_respawn_area,
-            )
-                .run_if(in_state(GameState::Playing)),
-        )
-        .run();
-}
 
 fn startup(mut commands: Commands) {
     commands.spawn((
@@ -206,10 +173,10 @@ fn build_ribbon_effect() -> EffectAsset {
     let init_size_attr = SetAttributeModifier::new(Attribute::SIZE, writer.lit(0.5).expr());
     let init_ribbon_id = SetAttributeModifier::new(Attribute::RIBBON_ID, writer.lit(0u32).expr());
 
-    let color_over_time_modifier = ColorOverLifetimeModifier::new(bevy_hanabi::Gradient::linear(
-        Vec4::new(1.0, 1., 1., 1.),
-        Vec4::new(1.0, 1., 1., 0.),
-    ));
+    let gradient =
+        bevy_hanabi::Gradient::linear(Vec4::new(1.0, 1., 1., 1.), Vec4::new(1.0, 1., 1., 0.));
+
+    let color_over_time_modifier = ColorOverLifetimeModifier::new(gradient);
 
     let size_over_time_modifier = SizeOverLifetimeModifier {
         gradient: bevy_hanabi::Gradient::linear(Vec3::splat(10.0), Vec3::ZERO),
@@ -322,7 +289,7 @@ fn ball_movement(
     bricks: Query<(), With<Brick>>,
     time: Res<Time>,
     mut commands: Commands,
-    audio_assets: Res<AudioAssets>,
+    mut play_sfx_writer: MessageWriter<PlaySfx>,
 ) {
     for (mut velocity, mut transform, mut spin) in &mut balls {
         velocity.0 = Vec2::from_angle(spin.curve_force).rotate(velocity.0);
@@ -336,10 +303,8 @@ fn ball_movement(
                 && ball_move_distance >= distance_to_wall
             {
                 velocity.0 = velocity.0.reflect(wall.0.normal.as_vec2());
-                commands.spawn((
-                    AudioPlayer::new(audio_assets.ball_hits_wall.clone()),
-                    PlaybackSettings::ONCE,
-                ));
+
+                play_sfx_writer.write(PlaySfx::BallWall);
                 spin.curve_force = 0.0;
                 return;
             }
@@ -364,10 +329,7 @@ fn ball_movement(
                 let linear_angle = angle.clamp(0., PI) / PI;
                 let softened_angle = FRAC_PI_6.lerp(PI - FRAC_PI_6, linear_angle);
                 velocity.0 = Vec2::from_angle(softened_angle) * velocity.0.length();
-                commands.spawn((
-                    AudioPlayer::new(audio_assets.ball_hits_paddle.clone()),
-                    PlaybackSettings::ONCE,
-                ));
+                play_sfx_writer.write(PlaySfx::BallPaddle);
                 spin.curve_force = match paddle_movement {
                     PaddleMovement::Left => -BALL_SPIN_MAGNITUDE,
                     PaddleMovement::Right => BALL_SPIN_MAGNITUDE,
@@ -402,10 +364,7 @@ fn ball_movement(
                 })
                 .min_by_key(|(_, hit_distance)| FloatOrd(*hit_distance))
                 .unwrap();
-                commands.spawn((
-                    AudioPlayer::new(audio_assets.pop.clone()),
-                    PlaybackSettings::ONCE,
-                ));
+                play_sfx_writer.write(PlaySfx::BrickBreak);
                 commands.entity(entity).despawn();
                 if spin.curve_force == 0.0 {
                     velocity.0 = velocity.0.reflect(hit_normal.into());
