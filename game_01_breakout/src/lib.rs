@@ -15,5 +15,5 @@ pub fn plugin(app: &mut App) {
         .add_loading_state(
             LoadingState::new(GameState::AssetLoading).continue_to_state(GameState::GameOver),
         )
-        .add_plugins((state::plugin, game::plugin, audio::plugin));
+        .add_plugins((state::plugin, game::plugin, audio::plugin, ui::plugin));
 }

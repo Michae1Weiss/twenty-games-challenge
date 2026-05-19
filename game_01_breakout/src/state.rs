@@ -10,6 +10,7 @@ pub enum GameState {
     AssetLoading,
     GameOver,
     Playing,
+    Menu,
 }
 
 #[derive(States, Debug, Clone, Copy, Default, Eq, PartialEq, Hash)]

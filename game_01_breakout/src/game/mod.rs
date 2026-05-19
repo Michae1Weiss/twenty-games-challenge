@@ -21,6 +21,7 @@ mod camera;
 mod input;
 mod physics;
 
+use crate::Screen;
 use crate::{audio::PlaySfx, game::assets::TextureAssets, state::GameState};
 
 pub(crate) fn plugin(app: &mut App) {
@@ -43,7 +44,7 @@ pub(crate) fn plugin(app: &mut App) {
             ball_movement,
             on_ball_intersects_respawn_area,
         )
-            .run_if(in_state(GameState::Playing)),
+            .run_if(in_state(GameState::Playing).and(not(in_state(Screen::Pause)))),
     );
 }
 
