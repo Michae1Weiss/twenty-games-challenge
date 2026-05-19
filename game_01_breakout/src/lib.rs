@@ -6,4 +6,6 @@ mod theme;
 mod third_party;
 mod ui;
 
-pub(crate) fn plugin(app: &mut App) {}
+pub fn plugin(app: &mut App) {
+    app.add_plugins(game::plugin);
+}
