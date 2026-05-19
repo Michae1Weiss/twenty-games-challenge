@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
 
-use crate::state::GameState;
+use crate::state::{GameState, Screen};
 
 mod audio;
 mod game;
@@ -13,6 +13,7 @@ mod ui;
 pub fn plugin(app: &mut App) {
     app.add_plugins(DefaultPlugins)
         .init_state::<GameState>()
+        .init_state::<Screen>()
         .add_loading_state(
             LoadingState::new(GameState::AssetLoading).continue_to_state(GameState::GameOver),
         )
