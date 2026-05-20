@@ -28,3 +28,9 @@ struct Enemy;
 ## When to write custom queries?
 ### Links:
 - [**tainedcoders.com** - Custom Queries](https://taintedcoders.com/bevy/patterns/custom-queries)
+
+## Pause the game (clean way)?
+Shows how `Time<Virtual>` can be used to pause, resume, slow down and speed up a game.
+### Links:
+- [**github/bevy/examples** - time/virtual_time.rs](https://github.com/bevyengine/bevy/blob/main/examples/time/virtual_time.rs)
+- [**docs.rs/bevy** - bevy::time::Virtual](https://docs.rs/bevy/latest/bevy/time/struct.Virtual.html)

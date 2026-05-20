@@ -17,6 +17,7 @@ use std::f32::consts::{FRAC_PI_6, PI};
 
 pub mod assets;
 mod input;
+mod pause;
 mod physics;
 
 use crate::{CANVAS_SIZE, Screen};
@@ -28,6 +29,7 @@ pub(crate) fn plugin(app: &mut App) {
     )
     .insert_resource(ClearColor(Color::from(SKY_300)))
     .add_plugins(HanabiPlugin)
+    .add_plugins(pause::plugin)
     .add_systems(Startup, startup)
     .add_systems(OnEnter(GameState::Playing), spawn_new_game)
     .add_systems(OnEnter(GameState::GameOver), show_restart_text)
@@ -42,7 +44,7 @@ pub(crate) fn plugin(app: &mut App) {
             ball_movement,
             on_ball_intersects_respawn_area,
         )
-            .run_if(in_state(GameState::Playing).and(not(in_state(Screen::Pause)))),
+            .run_if(in_state(GameState::Playing)),
     );
 }
 
