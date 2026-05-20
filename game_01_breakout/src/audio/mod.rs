@@ -7,6 +7,7 @@ mod settings;
 pub mod sfx;
 
 use assets::AudioAssets;
+pub use settings::AudioSettings;
 pub use sfx::PlaySfx;
 
 use crate::state::GameState;
@@ -21,5 +22,5 @@ pub(super) fn plugin(app: &mut App) {
     app.configure_loading_state(
         LoadingStateConfig::new(GameState::AssetLoading).load_collection::<AudioAssets>(),
     )
-    .add_plugins((sfx::plugin, music::plugin));
+    .add_plugins((sfx::plugin, music::plugin, settings::plugin));
 }

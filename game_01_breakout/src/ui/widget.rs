@@ -1,10 +1,7 @@
 use super::interaction::InteractionPalette;
 use crate::theme::palette::*;
 use bevy::{
-    ecs::{
-        spawn::SpawnWith,
-        system::{IntoObserverSystem, entity_command::observe},
-    },
+    ecs::{spawn::SpawnWith, system::IntoObserverSystem},
     prelude::*,
     ui_widgets::{Slider, SliderRange, SliderStep, SliderThumb, SliderValue, ValueChange},
 };
@@ -106,108 +103,60 @@ where
 ///   })
 pub fn slider_row<M, I>(label_text: impl Into<String>, initial: f32, on_change: I) -> impl Bundle
 where
-    I: IntoObserverSystem<ValueChange<f32>, (), M>,
+    I: IntoObserverSystem<ValueChange<f32>, (), M> + Send + Sync + 'static,
 {
-    // FIXME
-    unimplemented!();
-    let label_text = label_text.into();
+    let label_text = label_text.into(); // owned String, captured by the move closure
+
     (
         Name::new("SliderRow"),
-        Node::default(),
-        Children::spawn(SpawnWith(|parent: &mut ChildSpawner| {
+        Node {
+            align_items: AlignItems::Center,
+            column_gap: px(12),
+            ..default()
+        },
+        Children::spawn(SpawnWith(move |parent: &mut ChildSpawner| {
+            // label_text moved out here — used exactly once
             parent.spawn((
-                Name::new("SliderRow"),
-                Node::default(),
-                children![
-                    // Label
-                    (
-                        Name::new("SliderLabel"),
-                        Node {
-                            width: px(120),
-                            ..default()
-                        },
-                        Text(label_text),
-                        TextFont::from_font_size(20.0),
-                        TextColor(LABEL_TEXT),
-                    ),
-                    // Slider
-                    (
-                        Name::new("Slider"),
-                        Slider::default(),
-                        SliderValue(0.1),
-                        // SliderValue(initial),
-                        SliderRange::new(0.0, 1.0),
-                        SliderStep(0.1), // 10 discrete steps
-                        Node {
-                            width: px(260),
-                            height: px(20),
-                            justify_content: JustifyContent::Start,
-                            align_items: AlignItems::Center,
-                            ..default()
-                        },
-                        BackgroundColor(SLIDER_TRACK),
-                        // BorderRadius::all(px(10)),
-                        // observe(on_change),
-                        children![(
-                            Name::new("SliderThumb"),
-                            SliderThumb,
-                            Node {
-                                position_type: PositionType::Absolute,
-                                width: px(24),
-                                height: px(24),
-                                left: percent(0), // updated by the widget plugin
-                                ..default()
-                            },
-                            BackgroundColor(SLIDER_THUMB),
-                            // BorderRadius::MAX,
-                        )],
-                    ),
-                ],
+                Name::new("SliderLabel"),
+                Node {
+                    width: px(120),
+                    ..default()
+                },
+                Text(label_text),
+                TextFont::from_font_size(20.0),
+                TextColor(LABEL_TEXT),
             ));
+
+            // initial is Copy, used here — fine
+            parent
+                .spawn((
+                    Name::new("Slider"),
+                    Slider::default(),
+                    SliderValue(initial),
+                    SliderRange::new(0.0, 1.0),
+                    SliderStep(0.1),
+                    Node {
+                        width: px(260),
+                        height: px(20),
+                        justify_content: JustifyContent::Start,
+                        align_items: AlignItems::Center,
+                        ..default()
+                    },
+                    BackgroundColor(SLIDER_TRACK),
+                    children![(
+                        Name::new("SliderThumb"),
+                        SliderThumb,
+                        Node {
+                            position_type: PositionType::Absolute,
+                            width: px(24),
+                            height: px(24),
+                            left: percent(0),
+                            ..default()
+                        },
+                        BackgroundColor(SLIDER_THUMB),
+                    )],
+                ))
+                .observe(on_change); // on_change moved out, used once
         })),
-        // children![
-        //     // Label
-        //     (
-        //         Name::new("SliderLabel"),
-        //         Node {
-        //             width: px(120),
-        //             ..default()
-        //         },
-        //         // Text(label_text),
-        //         TextFont::from_font_size(20.0),
-        //         TextColor(LABEL_TEXT),
-        //     ),
-        //     // Slider
-        //     (
-        //         Name::new("Slider"),
-        //         Slider::default(),
-        //         SliderValue(initial),
-        //         SliderRange::new(0.0, 1.0),
-        //         SliderStep(0.1), // 10 discrete steps
-        //         Node {
-        //             width: px(260),
-        //             height: px(20),
-        //             justify_content: JustifyContent::Start,
-        //             align_items: AlignItems::Center,
-        //             ..default()
-        //         },
-        //         BackgroundColor(SLIDER_TRACK),
-        //         // BorderRadius::all(px(10)),
-        //         // observe(on_change),
-        //         children![(
-        //             Name::new("SliderThumb"),
-        //             SliderThumb,
-        //             Node {
-        //                 position_type: PositionType::Absolute,
-        //                 width: px(24),
-        //                 height: px(24),
-        //                 left: percent(0), // updated by the widget plugin
-        //                 ..default()
-        //             },
-        //             BackgroundColor(SLIDER_THUMB),
-        //             // BorderRadius::MAX,
-        //         )],
-        //     ),
-        // ],
     )
 }
