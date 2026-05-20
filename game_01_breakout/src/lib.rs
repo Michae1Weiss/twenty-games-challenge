@@ -2,12 +2,14 @@ use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
 
 mod audio;
+mod camera;
 mod game;
 pub mod state;
 mod theme;
 mod third_party;
 mod ui;
 
+pub use camera::CANVAS_SIZE;
 pub use state::{GameState, Screen};
 
 pub fn plugin(app: &mut App) {
@@ -15,5 +17,11 @@ pub fn plugin(app: &mut App) {
         .add_loading_state(
             LoadingState::new(GameState::AssetLoading).continue_to_state(GameState::GameOver),
         )
-        .add_plugins((state::plugin, game::plugin, audio::plugin, ui::plugin));
+        .add_plugins((
+            camera::plugin,
+            state::plugin,
+            game::plugin,
+            audio::plugin,
+            ui::plugin,
+        ));
 }

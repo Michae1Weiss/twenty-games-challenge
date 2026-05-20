@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 use bevy::{
-    camera::ScalingMode,
     color::palettes::{
         css::WHITE,
         tailwind::{SKY_50, SKY_300, SKY_600, SKY_800, SLATE_50, SLATE_900},
@@ -17,11 +16,10 @@ use bevy_hanabi::prelude::*;
 use std::f32::consts::{FRAC_PI_6, PI};
 
 pub mod assets;
-mod camera;
 mod input;
 mod physics;
 
-use crate::Screen;
+use crate::{CANVAS_SIZE, Screen};
 use crate::{audio::PlaySfx, game::assets::TextureAssets, state::GameState};
 
 pub(crate) fn plugin(app: &mut App) {
@@ -49,7 +47,6 @@ pub(crate) fn plugin(app: &mut App) {
 }
 
 const BALL_SIZE: f32 = 10.;
-const CANVAS_SIZE: Vec2 = Vec2::new(1280., 720.);
 const BRICK_SIZE: Vec2 = Vec2::new(80., 40.);
 const DEFAULT_PADDLE_SIZE: Vec2 = Vec2::new(200., 25.);
 const PADDLE_SPEED: f32 = 600.;
@@ -96,17 +93,6 @@ struct HalfSize(Vec2);
 struct RespawnBallArea;
 
 fn startup(mut commands: Commands) {
-    commands.spawn((
-        Camera2d,
-        Projection::Orthographic(OrthographicProjection {
-            scaling_mode: ScalingMode::AutoMin {
-                min_width: CANVAS_SIZE.x + BRICK_SIZE.x,
-                min_height: CANVAS_SIZE.y + BRICK_SIZE.y,
-            },
-            ..OrthographicProjection::default_2d()
-        }),
-    ));
-
     commands.spawn((
         Sprite {
             custom_size: Some(Vec2::new(CANVAS_SIZE.x + 4.0, CANVAS_SIZE.y + 4.0)),
