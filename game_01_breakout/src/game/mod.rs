@@ -1,3 +1,4 @@
+use bevy::color::palettes::css::{BLACK, DARK_GRAY, WHITE, WHITE_SMOKE};
 use bevy::prelude::*;
 use bevy::{
     color::palettes::tailwind::{SKY_50, SKY_300, SKY_800, SLATE_50},
@@ -19,12 +20,15 @@ pub(crate) fn plugin(app: &mut App) {
     app.configure_loading_state(
         LoadingStateConfig::new(GameState::AssetLoading).load_collection::<TextureAssets>(),
     )
-    .insert_resource(ClearColor(Color::from(SKY_300)))
+    .insert_resource(ClearColor(Color::from(BLACK)))
     .add_plugins(HanabiPlugin)
     .add_plugins(pause::plugin)
     .add_plugins(ball::plugin)
     .add_systems(Startup, startup)
-    .add_systems(OnEnter(GameState::Playing), spawn_new_game)
+    .add_systems(
+        OnEnter(GameState::Playing),
+        (spawn_background, spawn_new_game),
+    )
     .add_systems(OnEnter(GameState::GameOver), show_restart_text)
     .add_systems(
         Update,
@@ -67,20 +71,21 @@ fn startup(mut commands: Commands) {
     commands.spawn((
         Sprite {
             custom_size: Some(Vec2::new(CANVAS_SIZE.x + 4.0, CANVAS_SIZE.y + 4.0)),
-            color: Color::from(SKY_50),
+            color: Color::from(DARK_GRAY),
             ..default()
         },
         Transform::from_xyz(0.0, 0.0, -3.0),
     ));
 
-    commands.spawn((
-        Sprite {
-            custom_size: Some(CANVAS_SIZE),
-            color: Color::from(SKY_800),
-            ..default()
-        },
-        Transform::from_xyz(0.0, 0.0, -2.0),
-    ));
+    // commands.spawn((
+    //     Sprite {
+    //         // image: texture_assets.background.clone(),
+    //         custom_size: Some(CANVAS_SIZE),
+    //         // color: Color::from(SKY_800),
+    //         ..default()
+    //     },
+    //     Transform::from_xyz(0.0, 0.0, -2.0),
+    // ));
 
     // Left wall
     commands.spawn((
@@ -101,6 +106,18 @@ fn startup(mut commands: Commands) {
     commands.spawn((
         Wall(Plane2d::new(Vec2::NEG_Y)),
         Transform::from_xyz(0.0, CANVAS_SIZE.y / 2.0, 0.0),
+    ));
+}
+
+fn spawn_background(mut commands: Commands, texture_assets: Res<TextureAssets>) {
+    commands.spawn((
+        Sprite {
+            image: texture_assets.background.clone(),
+            custom_size: Some(CANVAS_SIZE),
+            ..default()
+        },
+        Transform::from_xyz(0.0, 0.0, -2.0),
+        DespawnOnExit(GameState::Playing),
     ));
 }
 

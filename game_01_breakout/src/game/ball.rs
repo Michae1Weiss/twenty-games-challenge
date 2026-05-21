@@ -2,7 +2,7 @@ use std::f32::consts::{FRAC_PI_6, PI};
 
 use bevy::{
     color::palettes::{
-        css::WHITE,
+        css::{BLACK, WHITE, WHITE_SMOKE},
         tailwind::{SKY_600, SLATE_900},
     },
     math::{
@@ -17,7 +17,10 @@ use bevy_hanabi::prelude::*;
 use crate::{
     CANVAS_SIZE, GameState,
     audio::PlaySfx,
-    game::{Brick, DEFAULT_PADDLE_SIZE, HalfSize, Paddle, PaddleMovement, Velocity, Wall},
+    game::{
+        Brick, DEFAULT_PADDLE_SIZE, HalfSize, Paddle, PaddleMovement, Velocity, Wall,
+        assets::TextureAssets,
+    },
 };
 
 pub(crate) fn plugin(app: &mut App) {
@@ -86,14 +89,16 @@ fn spawn_ball(
     mut effects: ResMut<Assets<EffectAsset>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
+    texture_assets: Res<TextureAssets>,
 ) {
     commands.spawn((
         Sprite {
+            image: texture_assets.danger_zone.clone(),
             custom_size: Some(Vec2::new(
                 CANVAS_SIZE.x,
                 CANVAS_SIZE.y / 8.0 - DEFAULT_PADDLE_SIZE.y / 2.0,
             )),
-            color: SKY_600.into(),
+            // color: .into(),
             ..default()
         },
         Anchor::BOTTOM_CENTER,
@@ -101,6 +106,12 @@ fn spawn_ball(
         RespawnBallArea,
         DespawnOnExit(GameState::Playing),
     ));
+
+    info!(
+        "x: {}, y:{}",
+        CANVAS_SIZE.x,
+        CANVAS_SIZE.y / 8.0 - DEFAULT_PADDLE_SIZE.y / 2.0
+    );
 
     let effect = build_ribbon_effect();
     let effect = effects.add(effect);
