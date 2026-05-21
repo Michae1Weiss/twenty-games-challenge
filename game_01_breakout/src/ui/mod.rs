@@ -4,6 +4,7 @@ mod interaction;
 mod main_menu;
 mod pause_menu;
 mod settings_menu;
+mod stepper;
 mod widget;
 
 pub(super) fn plugin(app: &mut App) {
@@ -12,5 +13,6 @@ pub(super) fn plugin(app: &mut App) {
         pause_menu::plugin,
         interaction::plugin,
         settings_menu::plugin,
+        stepper::plugin,
     ));
 }

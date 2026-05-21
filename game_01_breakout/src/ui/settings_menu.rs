@@ -1,9 +1,22 @@
-use bevy::{prelude::*, ui_widgets::ValueChange};
+// menu/settings_menu.rs
+use crate::{
+    GameState, Screen,
+    audio::{AudioSettings, Volume},
+    ui::{stepper::Stepper, stepper::stepper, widget::*},
+};
+use bevy::prelude::*;
 
-use crate::{GameState, Screen, audio::AudioSettings, ui::widget::*};
+#[derive(Component)]
+struct MusicVolume;
+#[derive(Component)]
+struct SfxVolume;
 
 pub(super) fn plugin(app: &mut App) {
-    app.add_systems(OnEnter(Screen::Settings), spawn);
+    app.add_systems(OnEnter(Screen::Settings), spawn)
+        .add_systems(
+            Update,
+            (bind_music, bind_sfx).run_if(in_state(Screen::Settings)),
+        );
 }
 
 fn spawn(mut commands: Commands, settings: Res<AudioSettings>) {
@@ -12,22 +25,36 @@ fn spawn(mut commands: Commands, settings: Res<AudioSettings>) {
         DespawnOnExit(Screen::Settings),
         children![
             header("Settings"),
-            slider_row("Music", settings.music_volume, on_music_change),
-            slider_row("Sound", settings.sfx_volume, on_sfx_change),
+            stepper(
+                "Music",
+                settings.music.as_steps(),
+                Volume::STEPS,
+                MusicVolume
+            ),
+            stepper("Sound", settings.sfx.as_steps(), Volume::STEPS, SfxVolume),
             button("Back", back),
         ],
     ));
 }
 
-fn on_music_change(change: On<ValueChange<f32>>, mut s: ResMut<AudioSettings>) {
-    s.music_volume = change.value;
+fn bind_music(
+    q: Query<&Stepper, (Changed<Stepper>, With<MusicVolume>)>,
+    mut settings: ResMut<AudioSettings>,
+) {
+    for stepper in &q {
+        settings.music = Volume::from_steps(stepper.value);
+    }
 }
 
-fn on_sfx_change(change: On<ValueChange<f32>>, mut s: ResMut<AudioSettings>) {
-    s.sfx_volume = change.value;
+fn bind_sfx(
+    q: Query<&Stepper, (Changed<Stepper>, With<SfxVolume>)>,
+    mut settings: ResMut<AudioSettings>,
+) {
+    for stepper in &q {
+        settings.sfx = Volume::from_steps(stepper.value);
+    }
 }
 
-/// Back returns to wherever we came from: Main if GameState::Menu, Pause if GameState::InGame.
 fn back(
     _: On<Pointer<Click>>,
     game_state: Res<State<GameState>>,
@@ -36,7 +63,6 @@ fn back(
     next.set(match game_state.get() {
         GameState::Menu => Screen::Main,
         GameState::Playing => Screen::Pause,
-        GameState::AssetLoading => unreachable!(),
-        GameState::GameOver => unreachable!(),
+        GameState::AssetLoading | GameState::GameOver => unreachable!(),
     });
 }

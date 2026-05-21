@@ -99,6 +99,7 @@ fn spawn_ball(
         Anchor::BOTTOM_CENTER,
         Transform::from_xyz(0.0, -CANVAS_SIZE.y / 2., -1.0),
         RespawnBallArea,
+        DespawnOnExit(GameState::Playing),
     ));
 
     let effect = build_ribbon_effect();

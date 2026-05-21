@@ -13,3 +13,6 @@ pub const SCREEN_BACKGROUND: Color = Color::srgb(0.07, 0.08, 0.10);
 pub const SLIDER_TRACK: Color = Color::srgb(0.15, 0.16, 0.20);
 pub const SLIDER_FILL: Color = Color::srgb(0.40, 0.60, 0.85);
 pub const SLIDER_THUMB: Color = Color::srgb(0.85, 0.85, 0.90);
+
+pub const SEGMENT_FILLED: Color = Color::srgb(0.95, 0.75, 0.20); // your gold
+pub const SEGMENT_EMPTY: Color = Color::srgb(0.18, 0.19, 0.23);

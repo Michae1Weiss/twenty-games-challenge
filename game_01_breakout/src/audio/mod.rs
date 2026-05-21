@@ -5,10 +5,12 @@ mod assets;
 mod music;
 mod settings;
 pub mod sfx;
+mod volume;
 
 use assets::AudioAssets;
 pub use settings::AudioSettings;
 pub use sfx::PlaySfx;
+pub use volume::Volume;
 
 use crate::state::GameState;
 
