@@ -18,7 +18,7 @@ fn play_game_music(
 ) {
     commands.spawn((
         AudioPlayer::new(audio_assets.game_music.clone()),
-        PlaybackSettings::LOOP.with_volume(Volume::Linear(audio_settings.music.perceptual())),
+        PlaybackSettings::LOOP.with_volume(Volume::Linear(audio_settings.music_volume.perceptual())),
         Music,
         DespawnOnExit(GameState::Playing),
     ));
@@ -31,7 +31,7 @@ fn play_menu_music(
 ) {
     commands.spawn((
         AudioPlayer::new(audio_assets.menu_music.clone()),
-        PlaybackSettings::LOOP.with_volume(Volume::Linear(audio_settings.music.perceptual())),
+        PlaybackSettings::LOOP.with_volume(Volume::Linear(audio_settings.music_volume.perceptual())),
         Music,
         DespawnOnExit(GameState::Menu),
     ));
@@ -44,7 +44,7 @@ fn play_game_over_music(
 ) {
     commands.spawn((
         AudioPlayer::new(audio_assets.game_over_music.clone()),
-        PlaybackSettings::LOOP.with_volume(Volume::Linear(audio_settings.music.perceptual())),
+        PlaybackSettings::LOOP.with_volume(Volume::Linear(audio_settings.music_volume.perceptual())),
         Music,
         DespawnOnExit(GameState::GameOver),
     ));

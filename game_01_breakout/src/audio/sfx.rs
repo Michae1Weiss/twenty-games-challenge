@@ -33,7 +33,8 @@ fn play_sfx(
 
         commands.spawn((
             AudioPlayer::new(handle.clone()),
-            PlaybackSettings::DESPAWN.with_volume(Volume::Linear(audio_settings.sfx.perceptual())),
+            PlaybackSettings::DESPAWN
+                .with_volume(Volume::Linear(audio_settings.sfx_volume.perceptual())),
             Sfx,
         ));
     }

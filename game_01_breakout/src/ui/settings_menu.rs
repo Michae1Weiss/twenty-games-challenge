@@ -27,11 +27,16 @@ fn spawn(mut commands: Commands, settings: Res<AudioSettings>) {
             header("Settings"),
             stepper(
                 "Music",
-                settings.music.as_steps(),
+                settings.music_volume.as_steps(),
                 Volume::STEPS,
                 MusicVolume
             ),
-            stepper("Sound", settings.sfx.as_steps(), Volume::STEPS, SfxVolume),
+            stepper(
+                "Sound",
+                settings.sfx_volume.as_steps(),
+                Volume::STEPS,
+                SfxVolume
+            ),
             button("Back", back),
         ],
     ));
@@ -42,7 +47,7 @@ fn bind_music(
     mut settings: ResMut<AudioSettings>,
 ) {
     for stepper in &q {
-        settings.music = Volume::from_steps(stepper.value);
+        settings.music_volume = Volume::from_steps(stepper.value);
     }
 }
 
@@ -51,7 +56,7 @@ fn bind_sfx(
     mut settings: ResMut<AudioSettings>,
 ) {
     for stepper in &q {
-        settings.sfx = Volume::from_steps(stepper.value);
+        settings.sfx_volume = Volume::from_steps(stepper.value);
     }
 }
 
