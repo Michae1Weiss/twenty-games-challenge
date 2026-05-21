@@ -1,6 +1,6 @@
 use bevy::{audio::Volume, prelude::*};
 
-use crate::state::GameState;
+use crate::{audio::AudioSettings, state::GameState};
 
 use super::{Sfx, assets::AudioAssets};
 
@@ -21,6 +21,7 @@ pub(super) fn plugin(app: &mut App) {
 fn play_sfx(
     mut play_sfx_reader: MessageReader<PlaySfx>,
     audio_assets: Res<AudioAssets>,
+    audio_settings: Res<AudioSettings>,
     mut commands: Commands,
 ) {
     for play_sfx in play_sfx_reader.read() {
@@ -32,7 +33,7 @@ fn play_sfx(
 
         commands.spawn((
             AudioPlayer::new(handle.clone()),
-            PlaybackSettings::DESPAWN.with_volume(Volume::Linear(0.5)),
+            PlaybackSettings::DESPAWN.with_volume(Volume::Linear(audio_settings.sfx.perceptual())),
             Sfx,
         ));
     }
