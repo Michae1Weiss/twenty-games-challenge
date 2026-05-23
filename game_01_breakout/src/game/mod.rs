@@ -3,6 +3,7 @@ use bevy::input::common_conditions::input_just_pressed;
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
 use bevy_hanabi::prelude::*;
+use rand::prelude::*;
 
 pub mod assets;
 mod ball;
@@ -29,9 +30,13 @@ pub(crate) fn plugin(app: &mut App) {
         (spawn_background, spawn_new_game),
     )
     .add_systems(OnEnter(GameState::GameOver), show_restart_text)
+    .add_systems(OnEnter(GameState::Won), show_victory_text)
     .add_systems(
         Update,
-        restart_game.run_if(in_state(GameState::GameOver).and(input_just_pressed(KeyCode::KeyR))),
+        restart_game.run_if(
+            (in_state(GameState::GameOver).or(in_state(GameState::Won)))
+                .and(input_just_pressed(KeyCode::KeyR)),
+        ),
     )
     .add_systems(
         FixedUpdate,
@@ -66,7 +71,7 @@ fn startup(mut commands: Commands) {
     commands.spawn((
         Sprite {
             custom_size: Some(Vec2::new(CANVAS_SIZE.x + 4.0, CANVAS_SIZE.y + 4.0)),
-            color: Color::from(DARK_GRAY),
+            color: Color::from(BLACK),
             ..default()
         },
         Transform::from_xyz(0.0, 0.0, -3.0),
@@ -126,6 +131,22 @@ fn restart_game(mut next_state: ResMut<NextState<GameState>>) {
 }
 
 fn show_restart_text(mut commands: Commands) {
+    let mut rng = rand::rng();
+
+    let insults = [
+        "You suck",
+        "Nice try, loser",
+        "Skill issue",
+        "Embarrassing",
+        "That was terrible",
+        "Delete the game",
+        "Disappointing",
+        "Noob",
+        "Absolute garbage",
+        "My grandma plays better",
+        "Try using your hands next time",
+    ];
+
     commands.spawn((
         Node {
             justify_content: JustifyContent::Center,
@@ -136,7 +157,28 @@ fn show_restart_text(mut commands: Commands) {
         },
         DespawnOnExit(GameState::GameOver),
         children![
-            Text::new("Press R to Restart Game"),
+            Text::new(format!(
+                "{}! Press R to Restart Game",
+                insults.choose(&mut rng).unwrap()
+            )),
+            TextFont::from_font_size(67.0),
+            TextColor(WHITE.into()),
+        ],
+    ));
+}
+
+fn show_victory_text(mut commands: Commands) {
+    commands.spawn((
+        Node {
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            width: percent(100.),
+            height: percent(100.),
+            ..default()
+        },
+        DespawnOnExit(GameState::Won),
+        children![
+            Text::new("Victory! Press R to Restart Game"),
             TextFont::from_font_size(67.0),
             TextColor(WHITE.into()),
         ],

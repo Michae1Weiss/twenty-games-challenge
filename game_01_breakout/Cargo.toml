@@ -10,5 +10,5 @@ dev = ["bevy/dynamic_linking", "bevy/debug"]
 bevy = { workspace = true }
 bevy_hanabi = { workspace = true }
 bevy_asset_loader = { workspace = true }
-# rand = { workspace = true }
+rand = { workspace = true }
 # rand_chacha = { workspace = true }

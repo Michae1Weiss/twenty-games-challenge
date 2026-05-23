@@ -35,11 +35,11 @@ const RIBBON_LIFETIME: f32 = 1.5; // Seconds
 const RIBBON_PARTICLE_CAPACITY: u32 = 100; // 64 * 1.5 = 98 or 100 (rounded)
 
 #[derive(Component)]
-struct Ball;
+pub struct Ball;
 
 /// Component representing a ball that curves when hit
 #[derive(Component)]
-struct Spin {
+pub struct Spin {
     /// direction & magnitude of curve force
     curve_force: f32,
 }
@@ -123,7 +123,7 @@ fn spawn_ball(
     ));
 }
 
-fn ball_movement(
+pub fn ball_movement(
     mut balls: Query<(&mut Velocity, &mut Transform, &mut Spin), With<Ball>>,
     walls: Query<(&Wall, &Transform), Without<Ball>>,
     aabb_colliders: Query<(Entity, &Transform, &HalfSize), Without<Ball>>,

@@ -69,5 +69,6 @@ fn back(
         GameState::Menu => Screen::Main,
         GameState::Playing => Screen::Pause,
         GameState::AssetLoading | GameState::GameOver => unreachable!(),
+        GameState::Won => unreachable!(),
     });
 }
