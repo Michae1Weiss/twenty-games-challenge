@@ -10,16 +10,15 @@ pub(super) fn plugin(app: &mut App) {
 }
 
 const BRICK_SIZE: Vec2 = Vec2::new(80., 40.);
+const N_BRICK_ROWS: i32 = 1;
+const N_BRICK_COLUMNS: i32 = 2;
 
 #[derive(Component)]
 pub struct Brick;
 
 fn spawn_bricks(mut commands: Commands, texture_assets: Res<TextureAssets>) {
-    let n_rows: i32 = 6;
-    let n_columns: i32 = 13;
-
-    for row in 0..n_rows {
-        for column in 0..n_columns {
+    for row in 0..N_BRICK_ROWS {
+        for column in 0..N_BRICK_COLUMNS {
             commands.spawn((
                 Brick,
                 Sprite {
