@@ -95,7 +95,6 @@ fn spawn_ball(
                 CANVAS_SIZE.x,
                 CANVAS_SIZE.y / 8.0 - DEFAULT_PADDLE_SIZE.y / 2.0,
             )),
-            // color: .into(),
             ..default()
         },
         Anchor::BOTTOM_CENTER,

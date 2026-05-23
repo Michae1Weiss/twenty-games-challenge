@@ -1,17 +1,19 @@
-use bevy::color::palettes::css::{BLACK, DARK_GRAY};
+use bevy::color::palettes::css::{BLACK, DARK_GRAY, WHITE};
+use bevy::input::common_conditions::input_just_pressed;
 use bevy::prelude::*;
-use bevy::{color::palettes::tailwind::SLATE_50, input::common_conditions::input_just_pressed};
 use bevy_asset_loader::prelude::*;
 use bevy_hanabi::prelude::*;
 
 pub mod assets;
 mod ball;
+mod brick;
 mod input;
 mod pause;
 mod physics;
 
 use crate::CANVAS_SIZE;
-use crate::{game::assets::TextureAssets, state::GameState};
+pub use crate::{game::assets::TextureAssets, state::GameState};
+pub use brick::Brick;
 
 pub(crate) fn plugin(app: &mut App) {
     app.configure_loading_state(
@@ -19,8 +21,7 @@ pub(crate) fn plugin(app: &mut App) {
     )
     .insert_resource(ClearColor(Color::from(BLACK)))
     .add_plugins(HanabiPlugin)
-    .add_plugins(pause::plugin)
-    .add_plugins(ball::plugin)
+    .add_plugins((pause::plugin, ball::plugin, brick::plugin))
     .add_systems(Startup, startup)
     .add_systems(
         OnEnter(GameState::Playing),
@@ -33,11 +34,10 @@ pub(crate) fn plugin(app: &mut App) {
     )
     .add_systems(
         FixedUpdate,
-        (paddle_controls,).run_if(in_state(GameState::Playing)),
+        paddle_controls.run_if(in_state(GameState::Playing)),
     );
 }
 
-const BRICK_SIZE: Vec2 = Vec2::new(80., 40.);
 const DEFAULT_PADDLE_SIZE: Vec2 = Vec2::new(200., 25.);
 const PADDLE_SPEED: f32 = 600.;
 
@@ -59,9 +59,6 @@ enum PaddleMovement {
 }
 
 #[derive(Component)]
-struct Brick;
-
-#[derive(Component)]
 struct HalfSize(Vec2);
 
 fn startup(mut commands: Commands) {
@@ -73,16 +70,6 @@ fn startup(mut commands: Commands) {
         },
         Transform::from_xyz(0.0, 0.0, -3.0),
     ));
-
-    // commands.spawn((
-    //     Sprite {
-    //         // image: texture_assets.background.clone(),
-    //         custom_size: Some(CANVAS_SIZE),
-    //         // color: Color::from(SKY_800),
-    //         ..default()
-    //     },
-    //     Transform::from_xyz(0.0, 0.0, -2.0),
-    // ));
 
     // Left wall
     commands.spawn((
@@ -131,29 +118,6 @@ fn spawn_new_game(mut commands: Commands, texture_assets: Res<TextureAssets>) {
         HalfSize(DEFAULT_PADDLE_SIZE / 2.),
         DespawnOnExit(GameState::Playing),
     ));
-
-    let n_rows: i32 = 6;
-    let n_columns: i32 = 13;
-
-    for row in 0..n_rows {
-        for column in 0..n_columns {
-            commands.spawn((
-                Brick,
-                Sprite {
-                    image: texture_assets.brick.clone(),
-                    custom_size: Some(BRICK_SIZE),
-                    ..default()
-                },
-                Transform::from_xyz(
-                    -480. + BRICK_SIZE.x * column as f32,
-                    240. - BRICK_SIZE.y * row as f32,
-                    0.0,
-                ),
-                HalfSize(BRICK_SIZE / 2.),
-                DespawnOnExit(GameState::Playing),
-            ));
-        }
-    }
 }
 
 fn restart_game(mut next_state: ResMut<NextState<GameState>>) {
@@ -173,7 +137,7 @@ fn show_restart_text(mut commands: Commands) {
         children![
             Text::new("Press R to Restart Game"),
             TextFont::from_font_size(67.0),
-            TextColor(SLATE_50.into()),
+            TextColor(WHITE.into()),
         ],
     ));
 }
