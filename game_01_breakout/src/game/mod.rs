@@ -1,9 +1,6 @@
-use bevy::color::palettes::css::{BLACK, DARK_GRAY, WHITE, WHITE_SMOKE};
+use bevy::color::palettes::css::{BLACK, DARK_GRAY};
 use bevy::prelude::*;
-use bevy::{
-    color::palettes::tailwind::{SKY_50, SKY_300, SKY_800, SLATE_50},
-    input::common_conditions::input_just_pressed,
-};
+use bevy::{color::palettes::tailwind::SLATE_50, input::common_conditions::input_just_pressed};
 use bevy_asset_loader::prelude::*;
 use bevy_hanabi::prelude::*;
 

@@ -1,10 +1,7 @@
 use std::f32::consts::{FRAC_PI_6, PI};
 
 use bevy::{
-    color::palettes::{
-        css::{BLACK, WHITE, WHITE_SMOKE},
-        tailwind::{SKY_600, SLATE_900},
-    },
+    color::palettes::{css::WHITE, tailwind::SLATE_900},
     math::{
         FloatOrd,
         bounding::{Aabb2d, BoundingCircle, IntersectsVolume, RayCast2d},

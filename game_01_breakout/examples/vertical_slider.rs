@@ -8,8 +8,8 @@ use bevy::{
     picking::hover::Hovered,
     prelude::*,
     ui_widgets::{
-        CoreSliderDragState, Slider, SliderRange, SliderThumb, SliderValue, TrackClick,
-        UiWidgetsPlugins, observe, slider_self_update,
+        Slider, SliderRange, SliderThumb, SliderValue, TrackClick, UiWidgetsPlugins, observe,
+        slider_self_update,
     },
 };
 
@@ -25,7 +25,7 @@ fn main() {
             TabNavigationPlugin,
         ))
         .add_systems(Startup, setup)
-        .add_systems(Update, (update_value_labels))
+        .add_systems(Update, update_value_labels)
         .run();
 }
 
@@ -41,7 +41,7 @@ struct DemoSliderThumb;
 #[derive(Component)]
 struct VerticalSlider;
 
-fn setup(mut commands: Commands, assets: Res<AssetServer>) {
+fn setup(mut commands: Commands) {
     commands.spawn(Camera2d);
 
     commands
@@ -254,51 +254,6 @@ fn horizontal_slider() -> impl Bundle {
             )),
         )),
     )
-}
-
-fn update_slider_visuals(
-    sliders: Query<
-        (
-            Entity,
-            &SliderValue,
-            &SliderRange,
-            &Hovered,
-            &CoreSliderDragState,
-            Has<VerticalSlider>,
-        ),
-        (
-            Or<(
-                Changed<SliderValue>,
-                Changed<Hovered>,
-                Changed<CoreSliderDragState>,
-            )>,
-            With<DemoSlider>,
-        ),
-    >,
-    children: Query<&Children>,
-    mut thumbs: Query<(&mut Node, &mut BackgroundColor, Has<DemoSliderThumb>), Without<DemoSlider>>,
-) {
-    for (slider_ent, value, range, hovered, drag_state, is_vertical) in sliders.iter() {
-        for child in children.iter_descendants(slider_ent) {
-            if let Ok((mut thumb_node, mut thumb_bg, is_thumb)) = thumbs.get_mut(child)
-                && is_thumb
-            {
-                let position = range.thumb_position(value.0) * 100.0;
-                if is_vertical {
-                    thumb_node.bottom = percent(position);
-                } else {
-                    thumb_node.left = percent(position);
-                }
-
-                let is_active = hovered.0 | drag_state.dragging;
-                thumb_bg.0 = if is_active {
-                    SLIDER_THUMB.lighter(0.3)
-                } else {
-                    SLIDER_THUMB
-                };
-            }
-        }
-    }
 }
 
 fn update_value_labels(

@@ -21,10 +21,6 @@ impl Volume {
         (self.0 * Self::STEPS as f32).round() as u8
     }
 
-    pub fn linear(self) -> f32 {
-        self.0
-    }
-
     /// Humans hear loudness logarithmically; square the linear value before
     /// sending it to an AudioSink so the control *feels* linear.
     pub fn perceptual(self) -> f32 {
