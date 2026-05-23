@@ -15,7 +15,7 @@ pub use state::{GameState, Screen};
 pub fn plugin(app: &mut App) {
     app.add_plugins((DefaultPlugins, UiWidgetsPlugins, InputDispatchPlugin))
         .add_loading_state(
-            LoadingState::new(GameState::AssetLoading).continue_to_state(GameState::GameOver),
+            LoadingState::new(GameState::AssetLoading).continue_to_state(GameState::Menu),
         )
         .add_plugins((
             camera::plugin,

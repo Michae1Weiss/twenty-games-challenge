@@ -104,12 +104,6 @@ fn spawn_ball(
         DespawnOnExit(GameState::Playing),
     ));
 
-    info!(
-        "x: {}, y:{}",
-        CANVAS_SIZE.x,
-        CANVAS_SIZE.y / 8.0 - DEFAULT_PADDLE_SIZE.y / 2.0
-    );
-
     let effect = build_ribbon_effect();
     let effect = effects.add(effect);
 
@@ -184,8 +178,6 @@ fn ball_movement(
                     PaddleMovement::Right => BALL_SPIN_MAGNITUDE,
                     PaddleMovement::Idle => 0.0,
                 };
-
-                info!("Paddle movement: {paddle_movement:?}");
             } else if bricks.get(entity).is_ok() {
                 let (hit_normal, _) = [
                     (
