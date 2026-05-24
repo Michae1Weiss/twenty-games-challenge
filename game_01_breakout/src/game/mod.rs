@@ -1,4 +1,4 @@
-use bevy::color::palettes::css::{BLACK, DARK_GRAY, WHITE};
+use bevy::color::palettes::css::{BLACK, WHITE};
 use bevy::input::common_conditions::input_just_pressed;
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
@@ -33,7 +33,7 @@ pub(crate) fn plugin(app: &mut App) {
     .add_plugins((
         pause::plugin,
         ball::plugin,
-        brick::plugin,
+        // brick::plugin,
         rules::plugin,
         round::plugin,
     ))

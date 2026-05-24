@@ -90,7 +90,6 @@ impl<M: Bundle> Command for SpawnBall<M> {
             Mesh2d(ball_outer_mesh),
             MeshMaterial2d(ball_outer_material),
             Transform::from_xyz(self.position.x, self.position.y, 0.0),
-            // DespawnOnExit(GameState::Playing),
             self.marker,
             children![(
                 Mesh2d(ball_inner_mesh),
@@ -134,48 +133,6 @@ fn build_ribbon_effect() -> EffectAsset {
         .render(color_over_time_modifier)
         .render(size_over_time_modifier)
 }
-
-// fn ball(
-//     mut commands: Commands,
-//     mut effects: ResMut<Assets<EffectAsset>>,
-//     mut meshes: ResMut<Assets<Mesh>>,
-//     mut materials: ResMut<Assets<ColorMaterial>>,
-//     texture_assets: Res<TextureAssets>,
-// ) {
-//     commands.spawn((
-//         Sprite {
-//             image: texture_assets.danger_zone.clone(),
-//             custom_size: Some(Vec2::new(
-//                 CANVAS_SIZE.x,
-//                 CANVAS_SIZE.y / 8.0 - DEFAULT_PADDLE_SIZE.y / 2.0,
-//             )),
-//             ..default()
-//         },
-//         Anchor::BOTTOM_CENTER,
-//         Transform::from_xyz(0.0, -CANVAS_SIZE.y / 2., -1.0),
-//         RespawnBallArea,
-//         DespawnOnExit(GameState::Playing),
-//     ));
-
-//     let effect = build_ribbon_effect();
-//     let effect = effects.add(effect);
-
-//     commands.spawn((
-//         Ball,
-//         Spin { curve_force: 0.0 },
-//         ParticleEffect::new(effect),
-//         Velocity(Vec2::new(-20., -480.)),
-//         Mesh2d(meshes.add(Circle::new(BALL_SIZE))),
-//         MeshMaterial2d(materials.add(Color::from(SLATE_900))),
-//         Transform::from_xyz(0.0, -50.0, 0.0),
-//         DespawnOnExit(GameState::Playing),
-//         children![(
-//             Mesh2d(meshes.add(Circle::new(BALL_SIZE - 1.0))),
-//             MeshMaterial2d(materials.add(Color::from(WHITE))),
-//             Transform::from_xyz(0.0, 0.0, 1.0)
-//         )],
-//     ));
-// }
 
 pub fn ball_movement(
     mut balls: Query<(&mut Velocity, &mut Transform, &mut Spin), With<Ball>>,
