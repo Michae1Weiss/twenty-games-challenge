@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::{GameState, game::Brick};
+use crate::{
+    GameState,
+    game::{Brick, EndRound},
+};
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(
@@ -15,11 +18,13 @@ fn check_victory(
     mut removed_bricks: RemovedComponents<Brick>,
     bricks: Query<(), With<Brick>>,
     mut game_state: ResMut<NextState<GameState>>,
+    mut end_round: MessageWriter<EndRound>,
 ) {
     let brick_was_removed = !removed_bricks.is_empty();
     removed_bricks.clear();
 
     if brick_was_removed && bricks.is_empty() {
+        end_round.write(EndRound);
         game_state.set(GameState::Won);
     }
 }

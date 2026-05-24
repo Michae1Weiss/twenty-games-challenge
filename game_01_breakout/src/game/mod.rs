@@ -9,6 +9,7 @@ pub mod assets;
 mod ball;
 mod brick;
 mod input;
+mod paddle;
 mod pause;
 mod physics;
 mod respawn;
@@ -16,8 +17,10 @@ mod round;
 mod rules;
 
 use crate::CANVAS_SIZE;
+use crate::game::paddle::Paddle;
 pub use crate::{game::assets::TextureAssets, state::GameState};
 pub use brick::Brick;
+pub use round::EndRound;
 pub use round::RestartRound;
 pub use round::StartRound;
 
@@ -35,10 +38,7 @@ pub(crate) fn plugin(app: &mut App) {
         round::plugin,
     ))
     .add_systems(Startup, startup)
-    .add_systems(
-        OnEnter(GameState::Playing),
-        (spawn_background, spawn_new_game),
-    )
+    .add_systems(OnEnter(GameState::Playing), spawn_background)
     .add_systems(OnEnter(GameState::GameOver), show_restart_text)
     .add_systems(OnEnter(GameState::Won), show_victory_text)
     .add_systems(
@@ -54,7 +54,6 @@ pub(crate) fn plugin(app: &mut App) {
     );
 }
 
-const DEFAULT_PADDLE_SIZE: Vec2 = Vec2::new(200., 25.);
 const PADDLE_SPEED: f32 = 600.;
 
 #[derive(Component)]
@@ -62,9 +61,6 @@ struct Velocity(Vec2);
 
 #[derive(Component)]
 struct Wall(Plane2d);
-
-#[derive(Component)]
-struct Paddle;
 
 #[derive(Component, Default, Debug)]
 enum PaddleMovement {
@@ -121,22 +117,11 @@ fn spawn_background(mut commands: Commands, texture_assets: Res<TextureAssets>) 
     ));
 }
 
-fn spawn_new_game(mut commands: Commands, texture_assets: Res<TextureAssets>) {
-    commands.spawn((
-        Sprite {
-            image: texture_assets.paddle.clone(),
-            custom_size: Some(DEFAULT_PADDLE_SIZE),
-            ..default()
-        },
-        Transform::from_xyz(0.0, -CANVAS_SIZE.y * 3.0 / 8.0, 0.0),
-        Paddle,
-        PaddleMovement::default(),
-        HalfSize(DEFAULT_PADDLE_SIZE / 2.),
-        DespawnOnExit(GameState::Playing),
-    ));
-}
-
-fn restart_game(mut next_state: ResMut<NextState<GameState>>) {
+fn restart_game(
+    mut next_state: ResMut<NextState<GameState>>,
+    mut start_round: MessageWriter<RestartRound>,
+) {
+    start_round.write(RestartRound);
     next_state.set(GameState::Playing);
 }
 

@@ -7,17 +7,13 @@ use bevy::{
         bounding::{Aabb2d, BoundingCircle, IntersectsVolume, RayCast2d},
     },
     prelude::*,
-    sprite::Anchor,
 };
 use bevy_hanabi::prelude::*;
 
 use crate::{
-    CANVAS_SIZE, GameState,
+    GameState,
     audio::PlaySfx,
-    game::{
-        Brick, DEFAULT_PADDLE_SIZE, HalfSize, Paddle, PaddleMovement, Velocity, Wall,
-        assets::TextureAssets, respawn::RespawnBallArea,
-    },
+    game::{Brick, HalfSize, Paddle, PaddleMovement, Velocity, Wall, respawn::RespawnBallArea},
 };
 
 pub(crate) fn plugin(app: &mut App) {

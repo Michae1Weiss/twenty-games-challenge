@@ -2,14 +2,20 @@ use bevy::{prelude::*, sprite::Anchor};
 
 use crate::{
     CANVAS_SIZE,
-    game::{DEFAULT_PADDLE_SIZE, TextureAssets},
+    game::{TextureAssets, round::DEFAULT_PADDLE_SIZE},
 };
 
 #[derive(Component)]
 pub struct RespawnBallArea;
 
-struct SpawnRespawnArea<M: Bundle> {
+pub struct SpawnRespawnArea<M: Bundle> {
     marker: M,
+}
+
+impl<M: Bundle> SpawnRespawnArea<M> {
+    pub fn new(marker: M) -> Self {
+        Self { marker }
+    }
 }
 
 impl<M: Bundle> Command for SpawnRespawnArea<M> {

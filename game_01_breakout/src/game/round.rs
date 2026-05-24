@@ -1,19 +1,31 @@
 use bevy::prelude::*;
 
-use crate::game::{TextureAssets, ball::SpawnBall, brick::spawn_grid_of_bricks};
+use crate::game::{
+    TextureAssets, ball::SpawnBall, brick::spawn_grid_of_bricks, paddle::SpawnPaddle,
+    respawn::SpawnRespawnArea,
+};
+
+pub const DEFAULT_PADDLE_SIZE: Vec2 = Vec2::new(200., 25.);
 
 pub(super) fn plugin(app: &mut App) {
-    app.add_systems(
-        Update,
-        (despawn_round, spawn_round)
-            .chain()
-            .run_if(on_message::<RestartRound>),
-    )
-    .add_systems(Update, spawn_round.run_if(on_message::<StartRound>));
+    app.add_message::<RestartRound>()
+        .add_message::<StartRound>()
+        .add_message::<EndRound>()
+        .add_systems(
+            Update,
+            (despawn_round, spawn_round)
+                .chain()
+                .run_if(on_message::<RestartRound>),
+        )
+        .add_systems(Update, spawn_round.run_if(on_message::<StartRound>))
+        .add_systems(Update, despawn_round.run_if(on_message::<EndRound>));
 }
 
 #[derive(Message)]
 pub struct RestartRound;
+
+#[derive(Message)]
+pub struct EndRound;
 
 #[derive(Message)]
 pub struct StartRound;
@@ -34,4 +46,6 @@ fn spawn_round(mut commands: Commands, textures: Res<TextureAssets>) {
         Vec2::new(-20., -480.),
         RoundEntity,
     ));
+    commands.queue(SpawnPaddle::new(DEFAULT_PADDLE_SIZE, RoundEntity));
+    commands.queue(SpawnRespawnArea::new(RoundEntity));
 }
