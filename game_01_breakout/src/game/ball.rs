@@ -13,7 +13,9 @@ use bevy_hanabi::prelude::*;
 use crate::{
     GameState,
     audio::PlaySfx,
-    game::{Brick, HalfSize, Paddle, PaddleMovement, Velocity, Wall, respawn::RespawnBallArea},
+    game::{
+        Brick, EndRound, HalfSize, Paddle, PaddleMovement, Velocity, Wall, respawn::RespawnBallArea,
+    },
 };
 
 pub(crate) fn plugin(app: &mut App) {
@@ -273,6 +275,7 @@ fn on_ball_intersects_respawn_area(
     respawn_area: Single<(&Transform, &Sprite), With<RespawnBallArea>>,
     balls: Query<&Transform, With<Ball>>,
     mut next_state: ResMut<NextState<GameState>>,
+    mut end_round_writer: MessageWriter<EndRound>,
 ) {
     for &ball in &balls {
         let circle = BoundingCircle::new(ball.translation.xy(), BALL_SIZE);
@@ -282,6 +285,7 @@ fn on_ball_intersects_respawn_area(
         )
         .intersects(&circle)
         {
+            end_round_writer.write_default();
             next_state.set(GameState::GameOver);
         }
     }

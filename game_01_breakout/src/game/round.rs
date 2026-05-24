@@ -21,13 +21,13 @@ pub(super) fn plugin(app: &mut App) {
         .add_systems(Update, despawn_round.run_if(on_message::<EndRound>));
 }
 
-#[derive(Message)]
+#[derive(Message, Default)]
 pub struct RestartRound;
 
-#[derive(Message)]
+#[derive(Message, Default)]
 pub struct EndRound;
 
-#[derive(Message)]
+#[derive(Message, Default)]
 pub struct StartRound;
 
 #[derive(Component, Clone)]
