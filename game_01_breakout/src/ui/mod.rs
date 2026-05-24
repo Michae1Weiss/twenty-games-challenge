@@ -7,6 +7,8 @@ mod settings_menu;
 mod stepper;
 mod widget;
 
+pub use pause_menu::RestartGame;
+
 pub(super) fn plugin(app: &mut App) {
     app.add_plugins((
         main_menu::plugin,

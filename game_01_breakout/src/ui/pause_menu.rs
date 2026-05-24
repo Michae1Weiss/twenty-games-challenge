@@ -1,12 +1,15 @@
 use bevy::prelude::*;
 
-use crate::{GameState, Screen, ui::widget::*};
+use crate::{GameState, Screen, game::RestartRound, ui::widget::*};
 
 pub(super) fn plugin(app: &mut App) {
     app.add_message::<RestartGame>()
         .add_systems(OnEnter(Screen::Pause), spawn)
         .add_systems(Update, toggle_pause.run_if(in_state(GameState::Playing)));
 }
+
+#[derive(Message)]
+pub struct RestartGame;
 
 fn spawn(mut commands: Commands) {
     commands.spawn((
@@ -29,9 +32,9 @@ fn resume(_: On<Pointer<Click>>, mut next: ResMut<NextState<Screen>>) {
 fn restart(
     _: On<Pointer<Click>>,
     mut next_screen: ResMut<NextState<Screen>>,
-    mut restart: MessageWriter<RestartGame>,
+    mut restart_round: MessageWriter<RestartRound>,
 ) {
-    restart.write(RestartGame);
+    restart_round.write(RestartRound);
     next_screen.set(Screen::None);
 }
 
@@ -61,6 +64,3 @@ fn toggle_pause(
         }
     }
 }
-
-#[derive(Message)]
-pub struct RestartGame;

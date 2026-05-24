@@ -11,11 +11,15 @@ mod brick;
 mod input;
 mod pause;
 mod physics;
+mod respawn;
+mod round;
 mod rules;
 
 use crate::CANVAS_SIZE;
 pub use crate::{game::assets::TextureAssets, state::GameState};
 pub use brick::Brick;
+pub use round::RestartRound;
+pub use round::StartRound;
 
 pub(crate) fn plugin(app: &mut App) {
     app.configure_loading_state(
@@ -23,7 +27,13 @@ pub(crate) fn plugin(app: &mut App) {
     )
     .insert_resource(ClearColor(Color::from(BLACK)))
     .add_plugins(HanabiPlugin)
-    .add_plugins((pause::plugin, ball::plugin, brick::plugin, rules::plugin))
+    .add_plugins((
+        pause::plugin,
+        ball::plugin,
+        brick::plugin,
+        rules::plugin,
+        round::plugin,
+    ))
     .add_systems(Startup, startup)
     .add_systems(
         OnEnter(GameState::Playing),

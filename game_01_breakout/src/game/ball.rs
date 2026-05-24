@@ -16,7 +16,7 @@ use crate::{
     audio::PlaySfx,
     game::{
         Brick, DEFAULT_PADDLE_SIZE, HalfSize, Paddle, PaddleMovement, Velocity, Wall,
-        assets::TextureAssets,
+        assets::TextureAssets, respawn::RespawnBallArea,
     },
 };
 
@@ -24,8 +24,7 @@ pub(crate) fn plugin(app: &mut App) {
     app.add_systems(
         FixedUpdate,
         (ball_movement, on_ball_intersects_respawn_area).run_if(in_state(GameState::Playing)),
-    )
-    .add_systems(OnEnter(GameState::Playing), spawn_ball);
+    );
 }
 
 const BALL_SIZE: f32 = 10.;
@@ -44,8 +43,65 @@ pub struct Spin {
     curve_force: f32,
 }
 
-#[derive(Component)]
-struct RespawnBallArea;
+pub struct SpawnBall<M: Bundle> {
+    position: Vec2,
+    velocity: Vec2,
+    marker: M,
+}
+
+impl<M: Bundle> SpawnBall<M> {
+    pub fn new(position: Vec2, velocity: Vec2, marker: M) -> Self {
+        Self {
+            position,
+            velocity,
+            marker,
+        }
+    }
+}
+
+impl<M: Bundle> Command for SpawnBall<M> {
+    fn apply(self, world: &mut World) -> () {
+        let ball_ribbon_effect =
+            world.resource_scope(|_, mut effect_assets: Mut<Assets<EffectAsset>>| {
+                let ribbon_effect = build_ribbon_effect();
+                effect_assets.add(ribbon_effect)
+            });
+
+        let ball_outer_mesh = world
+            .resource_scope(|_, mut meshes: Mut<Assets<Mesh>>| meshes.add(Circle::new(BALL_SIZE)));
+
+        let ball_outer_material =
+            world.resource_scope(|_, mut materials: Mut<Assets<ColorMaterial>>| {
+                materials.add(Color::from(SLATE_900))
+            });
+
+        let ball_inner_mesh = world.resource_scope(|_, mut meshes: Mut<Assets<Mesh>>| {
+            meshes.add(Circle::new(BALL_SIZE - 1.0))
+        });
+
+        let ball_inner_material =
+            world.resource_scope(|_, mut materials: Mut<Assets<ColorMaterial>>| {
+                materials.add(Color::from(WHITE))
+            });
+
+        world.spawn((
+            Ball,
+            Spin { curve_force: 0.0 },
+            ParticleEffect::new(ball_ribbon_effect),
+            Velocity(self.velocity),
+            Mesh2d(ball_outer_mesh),
+            MeshMaterial2d(ball_outer_material),
+            Transform::from_xyz(self.position.x, self.position.y, 0.0),
+            // DespawnOnExit(GameState::Playing),
+            self.marker,
+            children![(
+                Mesh2d(ball_inner_mesh),
+                MeshMaterial2d(ball_inner_material),
+                Transform::from_xyz(0.0, 0.0, 1.0)
+            )],
+        ));
+    }
+}
 
 fn build_ribbon_effect() -> EffectAsset {
     let writer = ExprWriter::new();
@@ -81,47 +137,47 @@ fn build_ribbon_effect() -> EffectAsset {
         .render(size_over_time_modifier)
 }
 
-fn spawn_ball(
-    mut commands: Commands,
-    mut effects: ResMut<Assets<EffectAsset>>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-    texture_assets: Res<TextureAssets>,
-) {
-    commands.spawn((
-        Sprite {
-            image: texture_assets.danger_zone.clone(),
-            custom_size: Some(Vec2::new(
-                CANVAS_SIZE.x,
-                CANVAS_SIZE.y / 8.0 - DEFAULT_PADDLE_SIZE.y / 2.0,
-            )),
-            ..default()
-        },
-        Anchor::BOTTOM_CENTER,
-        Transform::from_xyz(0.0, -CANVAS_SIZE.y / 2., -1.0),
-        RespawnBallArea,
-        DespawnOnExit(GameState::Playing),
-    ));
+// fn ball(
+//     mut commands: Commands,
+//     mut effects: ResMut<Assets<EffectAsset>>,
+//     mut meshes: ResMut<Assets<Mesh>>,
+//     mut materials: ResMut<Assets<ColorMaterial>>,
+//     texture_assets: Res<TextureAssets>,
+// ) {
+//     commands.spawn((
+//         Sprite {
+//             image: texture_assets.danger_zone.clone(),
+//             custom_size: Some(Vec2::new(
+//                 CANVAS_SIZE.x,
+//                 CANVAS_SIZE.y / 8.0 - DEFAULT_PADDLE_SIZE.y / 2.0,
+//             )),
+//             ..default()
+//         },
+//         Anchor::BOTTOM_CENTER,
+//         Transform::from_xyz(0.0, -CANVAS_SIZE.y / 2., -1.0),
+//         RespawnBallArea,
+//         DespawnOnExit(GameState::Playing),
+//     ));
 
-    let effect = build_ribbon_effect();
-    let effect = effects.add(effect);
+//     let effect = build_ribbon_effect();
+//     let effect = effects.add(effect);
 
-    commands.spawn((
-        Ball,
-        Spin { curve_force: 0.0 },
-        ParticleEffect::new(effect),
-        Velocity(Vec2::new(-20., -480.)),
-        Mesh2d(meshes.add(Circle::new(BALL_SIZE))),
-        MeshMaterial2d(materials.add(Color::from(SLATE_900))),
-        Transform::from_xyz(0.0, -50.0, 0.0),
-        DespawnOnExit(GameState::Playing),
-        children![(
-            Mesh2d(meshes.add(Circle::new(BALL_SIZE - 1.0))),
-            MeshMaterial2d(materials.add(Color::from(WHITE))),
-            Transform::from_xyz(0.0, 0.0, 1.0)
-        )],
-    ));
-}
+//     commands.spawn((
+//         Ball,
+//         Spin { curve_force: 0.0 },
+//         ParticleEffect::new(effect),
+//         Velocity(Vec2::new(-20., -480.)),
+//         Mesh2d(meshes.add(Circle::new(BALL_SIZE))),
+//         MeshMaterial2d(materials.add(Color::from(SLATE_900))),
+//         Transform::from_xyz(0.0, -50.0, 0.0),
+//         DespawnOnExit(GameState::Playing),
+//         children![(
+//             Mesh2d(meshes.add(Circle::new(BALL_SIZE - 1.0))),
+//             MeshMaterial2d(materials.add(Color::from(WHITE))),
+//             Transform::from_xyz(0.0, 0.0, 1.0)
+//         )],
+//     ));
+// }
 
 pub fn ball_movement(
     mut balls: Query<(&mut Velocity, &mut Transform, &mut Spin), With<Ball>>,

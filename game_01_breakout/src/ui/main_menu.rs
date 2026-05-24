@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
+    game::StartRound,
     state::{GameState, Screen},
     ui::widget::*,
 };
@@ -26,9 +27,11 @@ fn enter_game(
     _: On<Pointer<Click>>,
     mut next_app: ResMut<NextState<GameState>>,
     mut next_screen: ResMut<NextState<Screen>>,
+    mut start_round: MessageWriter<StartRound>,
 ) {
     next_app.set(GameState::Playing);
     next_screen.set(Screen::None);
+    start_round.write(StartRound);
 }
 
 fn open_settings(_: On<Pointer<Click>>, mut next: ResMut<NextState<Screen>>) {

@@ -11,6 +11,7 @@ mod ui;
 
 pub use camera::CANVAS_SIZE;
 pub use state::{GameState, Screen};
+pub use ui::RestartGame;
 
 pub fn plugin(app: &mut App) {
     app.add_plugins((DefaultPlugins, UiWidgetsPlugins, InputDispatchPlugin))
