@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
 
 mod assets;
+mod bullet_time_audio;
 mod music;
 mod settings;
 pub mod sfx;
@@ -24,5 +25,10 @@ pub(super) fn plugin(app: &mut App) {
     app.configure_loading_state(
         LoadingStateConfig::new(GameState::AssetLoading).load_collection::<AudioAssets>(),
     )
-    .add_plugins((sfx::plugin, music::plugin, settings::plugin));
+    .add_plugins((
+        sfx::plugin,
+        music::plugin,
+        settings::plugin,
+        bullet_time_audio::plugin,
+    ));
 }
