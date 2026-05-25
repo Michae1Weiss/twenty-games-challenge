@@ -2,13 +2,29 @@ use bevy::prelude::*;
 
 use crate::game::{
     HalfSize, TextureAssets,
-    collision::{Collider, CollisionResponse},
+    collision::{Collider, Collision, CollisionResponse},
 };
+
+pub(super) fn plugin(app: &mut App) {
+    app.add_message::<BrickDestroyed>()
+        .add_systems(Update, destroy_on_collision);
+}
 
 const BRICK_SIZE: Vec2 = Vec2::new(80., 40.);
 
 #[derive(Component)]
 pub struct Brick;
+
+#[derive(Message)]
+pub struct BrickDestroyed {
+    position: Vec2,
+}
+
+impl BrickDestroyed {
+    pub fn new(position: Vec2) -> Self {
+        Self { position }
+    }
+}
 
 pub struct SpawnBricks<M>
 where
@@ -60,9 +76,23 @@ where
                     Collider::Aabb {
                         half_size: BRICK_SIZE / 2.0,
                     },
-                    CollisionResponse::Reflect,
+                    CollisionResponse::ReflectOrPierce,
                 ));
             }
+        }
+    }
+}
+
+fn destroy_on_collision(
+    mut commands: Commands,
+    bricks: Query<&Transform, With<Brick>>,
+    mut collisions: MessageReader<Collision>,
+    mut brick_destroyed_writer: MessageWriter<BrickDestroyed>,
+) {
+    for collision in collisions.read() {
+        if let Ok(translation) = bricks.get(collision.hit) {
+            commands.entity(collision.hit).despawn();
+            brick_destroyed_writer.write(BrickDestroyed::new(translation.translation.xy()));
         }
     }
 }
