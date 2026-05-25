@@ -12,7 +12,7 @@ mod bullet_time;
 mod input;
 mod paddle;
 mod pause;
-mod physics;
+mod collision;
 mod respawn;
 mod round;
 mod rules;
