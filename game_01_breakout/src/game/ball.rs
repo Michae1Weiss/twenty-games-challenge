@@ -17,14 +17,15 @@ use crate::{
     game::{
         Brick, EndRound, HalfSize, Paddle, PaddleMovement, Velocity,
         collision::{Collider, Collision, CollisionResponse, SpinEffect, deflect, first_contact},
-        respawn::RespawnBallArea, wall::Wall,
+        respawn::RespawnBallArea,
+        wall::Wall,
     },
 };
 
 pub(crate) fn plugin(app: &mut App) {
     app.add_systems(
         FixedUpdate,
-        (ball_movement, on_ball_intersects_respawn_area).run_if(in_state(GameState::Playing)),
+        (simulate_balls, on_ball_intersects_respawn_area).run_if(in_state(GameState::Playing)),
     );
 }
 
@@ -140,13 +141,16 @@ fn build_ribbon_effect() -> EffectAsset {
 
 fn simulate_balls(
     mut balls: Query<(Entity, &mut Velocity, &mut Transform, &mut Spin), With<Ball>>,
-    colliders: Query<(
-        Entity,
-        &Transform,
-        &Collider,
-        &CollisionResponse,
-        Option<&SpinEffect>,
-    )>,
+    colliders: Query<
+        (
+            Entity,
+            &Transform,
+            &Collider,
+            &CollisionResponse,
+            Option<&SpinEffect>,
+        ),
+        Without<Ball>,
+    >,
     time: Res<Time>,
     mut collisions: MessageWriter<Collision>,
 ) {

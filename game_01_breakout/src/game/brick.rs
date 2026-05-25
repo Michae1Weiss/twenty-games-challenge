@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::game::{HalfSize, TextureAssets};
+use crate::game::{
+    HalfSize, TextureAssets,
+    collision::{Collider, CollisionResponse},
+};
 
 const BRICK_SIZE: Vec2 = Vec2::new(80., 40.);
 
@@ -54,6 +57,10 @@ where
                     ),
                     HalfSize(BRICK_SIZE / 2.0),
                     self.marker,
+                    Collider::Aabb {
+                        half_size: BRICK_SIZE / 2.0,
+                    },
+                    CollisionResponse::Reflect,
                 ));
             }
         }

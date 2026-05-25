@@ -8,6 +8,12 @@ use bevy::{
     prelude::*,
 };
 
+use crate::game::ball::Ball;
+
+pub(super) fn plugin(app: &mut App) {
+    app.add_message::<Collision>();
+}
+
 #[derive(Component)]
 pub enum Collider {
     Aabb { half_size: Vec2 },   // e.g. brick, paddle
@@ -24,7 +30,7 @@ pub enum CollisionResponse {
 #[derive(Component, Clone, Copy)]
 pub enum SpinEffect {
     Clear,
-    Impart(f32), // TODO: f32 is ...? Describe what f32 stays for!
+    Impart(f32), // radian/sec
 }
 
 #[derive(Message)]
@@ -54,7 +60,7 @@ pub fn first_contact(
             &CollisionResponse,
             Option<&SpinEffect>,
         ),
-        // Without<Ball>,
+        Without<Ball>,
     >,
 ) -> Option<(Contact, CollisionResponse, Option<SpinEffect>)> {
     let ray_cast = RayCast2d::from_ray(ray, max_distance);

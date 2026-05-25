@@ -38,6 +38,7 @@ pub(crate) fn plugin(app: &mut App) {
         bullet_time::plugin,
         rules::plugin,
         round::plugin,
+        collision::plugin,
     ))
     .add_systems(Startup, startup)
     .add_systems(OnEnter(GameState::Playing), spawn_background)

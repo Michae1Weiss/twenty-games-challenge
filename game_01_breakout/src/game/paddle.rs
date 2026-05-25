@@ -3,7 +3,10 @@ use bevy_transform_interpolation::prelude::TransformInterpolation;
 
 use crate::{
     CANVAS_SIZE,
-    game::{HalfSize, PaddleMovement, TextureAssets},
+    game::{
+        HalfSize, PaddleMovement, TextureAssets,
+        collision::{Collider, CollisionResponse, SpinEffect},
+    },
 };
 
 #[derive(Component)]
@@ -36,6 +39,11 @@ impl<M: Bundle> Command for SpawnPaddle<M> {
             Paddle,
             PaddleMovement::default(),
             HalfSize(self.size / 2.),
+            Collider::Aabb {
+                half_size: self.size / 2.,
+            },
+            CollisionResponse::Deflect,
+            SpinEffect::Impart(0.005),
             self.marker,
         ));
     }
