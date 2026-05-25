@@ -40,6 +40,7 @@ pub(crate) fn plugin(app: &mut App) {
         rules::plugin,
         round::plugin,
         collision::plugin,
+        paddle::plugin,
     ))
     .add_systems(Startup, startup)
     .add_systems(OnEnter(GameState::Playing), spawn_background)

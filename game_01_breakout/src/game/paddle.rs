@@ -9,6 +9,10 @@ use crate::{
     },
 };
 
+pub(super) fn plugin(app: &mut App) {
+    app.add_systems(Update, impart_spin);
+}
+
 #[derive(Component)]
 pub struct Paddle;
 
@@ -46,5 +50,15 @@ impl<M: Bundle> Command for SpawnPaddle<M> {
             SpinEffect::Impart(0.005),
             self.marker,
         ));
+    }
+}
+
+fn impart_spin(mut paddles: Query<(&PaddleMovement, &mut SpinEffect), With<Paddle>>) {
+    for (movement, mut effect) in &mut paddles {
+        *effect = SpinEffect::Impart(match movement {
+            PaddleMovement::Left => -0.005,
+            PaddleMovement::Right => 0.005,
+            PaddleMovement::Idle => 0.0,
+        });
     }
 }
