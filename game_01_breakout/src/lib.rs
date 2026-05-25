@@ -1,4 +1,4 @@
-use bevy::{input_focus::InputDispatchPlugin, prelude::*, ui_widgets::UiWidgetsPlugins};
+use bevy::{input_focus::InputDispatchPlugin, prelude::*};
 use bevy_asset_loader::prelude::*;
 
 mod audio;
@@ -17,7 +17,6 @@ pub use ui::RestartGame;
 pub fn plugin(app: &mut App) {
     app.add_plugins((
         DefaultPlugins,
-        UiWidgetsPlugins,
         InputDispatchPlugin,
         TransformInterpolationPlugin::default(),
     ))
