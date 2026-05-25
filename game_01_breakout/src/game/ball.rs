@@ -15,7 +15,9 @@ use crate::{
     GameState,
     audio::PlaySfx,
     game::{
-        Brick, EndRound, HalfSize, Paddle, PaddleMovement, Velocity, Wall, respawn::RespawnBallArea,
+        Brick, EndRound, HalfSize, Paddle, PaddleMovement, Velocity, Wall,
+        collision::{Collider, Collision, CollisionResponse, SpinEffect, deflect, first_contact},
+        respawn::RespawnBallArea,
     },
 };
 
@@ -136,6 +138,62 @@ fn build_ribbon_effect() -> EffectAsset {
         .render(size_over_time_modifier)
 }
 
+fn simulate_balls(
+    mut balls: Query<(Entity, &mut Velocity, &mut Transform, &mut Spin), With<Ball>>,
+    colliders: Query<(
+        Entity,
+        &Transform,
+        &Collider,
+        &CollisionResponse,
+        Option<&SpinEffect>,
+    )>,
+    time: Res<Time>,
+    mut collisions: MessageWriter<Collision>,
+) {
+    for (ball, mut velocity, mut transform, mut spin) in &mut balls {
+        velocity.0 = Vec2::from_angle(spin.curve_force).rotate(velocity.0);
+        let step = velocity.0 * time.delta_secs();
+        let ray = Ray2d::new(transform.translation.xy(), Dir2::new(velocity.0).unwrap());
+
+        if let Some((contact, response, spin_effect)) =
+            first_contact(ray, step.length(), &colliders)
+        {
+            match response {
+                CollisionResponse::Reflect => {
+                    velocity.0 = velocity.0.reflect(contact.contact_surface_normal.as_vec2())
+                }
+                CollisionResponse::Deflect => {
+                    velocity.0 = deflect(
+                        transform.translation.xy(),
+                        contact.hit_body_center,
+                        velocity.0.length(),
+                    )
+                }
+                CollisionResponse::ReflectOrPierce if spin.curve_force == 0.0 => {
+                    velocity.0 = velocity.0.reflect(contact.contact_surface_normal.as_vec2())
+                }
+                CollisionResponse::ReflectOrPierce => {} // curving: punch through
+            }
+
+            match spin_effect {
+                Some(SpinEffect::Clear) => spin.curve_force = 0.0,
+                Some(SpinEffect::Impart(force)) => spin.curve_force = force,
+                None => {} // brick: leave the curve untouched
+            }
+
+            collisions.write(Collision {
+                ball,
+                hit: contact.entity,
+                point: contact.contact_point,
+                normal: contact.contact_surface_normal,
+            });
+            continue;
+        }
+
+        transform.translation += step.extend(0.0);
+    }
+}
+
 pub fn ball_movement(
     mut balls: Query<(&mut Velocity, &mut Transform, &mut Spin), With<Ball>>,
     walls: Query<(&Wall, &Transform), Without<Ball>>,
@@ -217,7 +275,7 @@ pub fn ball_movement(
                 })
                 .min_by_key(|(_, hit_distance)| FloatOrd(*hit_distance))
                 .unwrap();
-                
+
                 play_sfx_writer.write(PlaySfx::BrickBreak);
                 commands.entity(entity).despawn();
                 if spin.curve_force == 0.0 {

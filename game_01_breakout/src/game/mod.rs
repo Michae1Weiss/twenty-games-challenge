@@ -9,13 +9,14 @@ pub mod assets;
 mod ball;
 mod brick;
 mod bullet_time;
+mod collision;
 mod input;
 mod paddle;
 mod pause;
-mod collision;
 mod respawn;
 mod round;
 mod rules;
+mod wall;
 
 use crate::CANVAS_SIZE;
 use crate::game::paddle::Paddle;
