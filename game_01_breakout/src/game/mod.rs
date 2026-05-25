@@ -61,9 +61,6 @@ const PADDLE_SPEED: f32 = 600.;
 #[derive(Component)]
 struct Velocity(Vec2);
 
-#[derive(Component)]
-struct Wall(Plane2d);
-
 #[derive(Component, Default, Debug)]
 enum PaddleMovement {
     Left,
@@ -75,7 +72,7 @@ enum PaddleMovement {
 #[derive(Component)]
 struct HalfSize(Vec2);
 
-// TODO: create a plugin for background and walls
+// TODO: create a plugin for background
 fn startup(mut commands: Commands) {
     commands.spawn((
         Sprite {
@@ -84,27 +81,6 @@ fn startup(mut commands: Commands) {
             ..default()
         },
         Transform::from_xyz(0.0, 0.0, -3.0),
-    ));
-
-    // Left wall
-    commands.spawn((
-        Wall(Plane2d::new(Vec2::X)),
-        Transform::from_xyz(-CANVAS_SIZE.x / 2.0, 0.0, 0.0),
-    ));
-    // Right wall
-    commands.spawn((
-        Wall(Plane2d::new(Vec2::NEG_X)),
-        Transform::from_xyz(CANVAS_SIZE.x / 2.0, 0.0, 0.0),
-    ));
-    // Bottom wall
-    commands.spawn((
-        Wall(Plane2d::new(Vec2::Y)),
-        Transform::from_xyz(0.0, -CANVAS_SIZE.y / 2.0, 0.0),
-    ));
-    // Top wall
-    commands.spawn((
-        Wall(Plane2d::new(Vec2::NEG_Y)),
-        Transform::from_xyz(0.0, CANVAS_SIZE.y / 2.0, 0.0),
     ));
 }
 

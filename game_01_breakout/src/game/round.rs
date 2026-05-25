@@ -1,7 +1,11 @@
 use bevy::prelude::*;
 
-use crate::game::{
-    ball::SpawnBall, brick::SpawnBricks, paddle::SpawnPaddle, respawn::SpawnRespawnArea,
+use crate::{
+    CANVAS_SIZE,
+    game::{
+        ball::SpawnBall, brick::SpawnBricks, paddle::SpawnPaddle, respawn::SpawnRespawnArea,
+        wall::SpawnWalls,
+    },
 };
 
 pub const DEFAULT_PADDLE_SIZE: Vec2 = Vec2::new(200., 25.);
@@ -39,6 +43,7 @@ fn despawn_round(mut command: Commands, round_entities: Query<Entity, With<Round
 }
 
 fn spawn_round(mut commands: Commands) {
+    commands.queue(SpawnWalls::new(CANVAS_SIZE, RoundEntity));
     commands.queue(SpawnBricks::new(1, 6, RoundEntity));
     commands.queue(SpawnBall::new(
         Vec2::new(0.0, -50.0),
