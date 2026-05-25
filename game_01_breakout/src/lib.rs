@@ -3,6 +3,7 @@ use bevy_asset_loader::prelude::*;
 
 mod audio;
 mod camera;
+mod crt;
 mod game;
 pub mod state;
 mod theme;
@@ -29,5 +30,6 @@ pub fn plugin(app: &mut App) {
         game::plugin,
         audio::plugin,
         ui::plugin,
+        crt::plugin,
     ));
 }

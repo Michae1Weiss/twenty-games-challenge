@@ -1,3 +1,4 @@
+use crate::crt::CrtSettings;
 use bevy::{camera::ScalingMode, prelude::*};
 
 pub const CANVAS_SIZE: Vec2 = Vec2::new(1280., 720.);
@@ -17,5 +18,6 @@ fn spawn_camera(mut commands: Commands) {
             },
             ..OrthographicProjection::default_2d()
         }),
+        CrtSettings::default(),
     ));
 }
