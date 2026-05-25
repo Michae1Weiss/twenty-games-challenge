@@ -9,6 +9,7 @@ use bevy::{
     prelude::*,
 };
 use bevy_hanabi::prelude::*;
+use bevy_transform_interpolation::prelude::TransformInterpolation;
 
 use crate::{
     GameState,
@@ -90,6 +91,7 @@ impl<M: Bundle> Command for SpawnBall<M> {
             Mesh2d(ball_outer_mesh),
             MeshMaterial2d(ball_outer_material),
             Transform::from_xyz(self.position.x, self.position.y, 0.0),
+            TransformInterpolation,
             self.marker,
             children![(
                 Mesh2d(ball_inner_mesh),

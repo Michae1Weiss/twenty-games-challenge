@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_transform_interpolation::prelude::TransformInterpolation;
 
 use crate::{
     CANVAS_SIZE,
@@ -31,6 +32,7 @@ impl<M: Bundle> Command for SpawnPaddle<M> {
                 ..default()
             },
             Transform::from_xyz(0.0, -CANVAS_SIZE.y * 3.0 / 8.0, 0.0),
+            TransformInterpolation,
             Paddle,
             PaddleMovement::default(),
             HalfSize(self.size / 2.),
