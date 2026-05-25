@@ -55,4 +55,8 @@ Use `SystemSet`
 - [**docs.rs/bevy_enhanced_input** - Crate bevy_enhanced_input](https://docs.rs/bevy_enhanced_input/latest/bevy_enhanced_input/)
 - [**github** - leafwing-input-manager](https://github.com/Leafwing-Studios/leafwing-input-manager)
 
+## Interpolation?
+Just use **bevy_transform_interpolation** - GOATed!
+- [**github** - bevy_transform_interpolation](https://github.com/Jondolf/bevy_transform_interpolation)
+
 ## Fullscreen shader?

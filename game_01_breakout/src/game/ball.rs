@@ -217,6 +217,7 @@ pub fn ball_movement(
                 })
                 .min_by_key(|(_, hit_distance)| FloatOrd(*hit_distance))
                 .unwrap();
+                
                 play_sfx_writer.write(PlaySfx::BrickBreak);
                 commands.entity(entity).despawn();
                 if spin.curve_force == 0.0 {

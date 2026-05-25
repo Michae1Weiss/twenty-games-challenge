@@ -1,3 +1,13 @@
 ## Game 01 - Breakout
 - [ ] User input is spread all over the code with hardcoded KeyCodes. It would be nice to consolidate the input logic in one place and expose actions so callers don't have to be responsible to define key bindings etc.
 - [ ] `in_state` is all over the codebase. Replace with `SystemSet`!
+- [ ] Implement score plugin
+  - [ ] Score multiplier after each broken brick and reset multiplier on paddle hit
+  - [ ] Score multiplier in sniper mode if user hits every time
+  - [ ] Save best store
+- [ ] Publish a message on brick breakage so other plugins can read & react on it
+- [ ] Brick destroy animation (particles)
+- [ ] Brick destroy animation (score points) - change color of score text
+- [ ] Change brick destroy sound depending on score
+- [ ] Change brick destroy particle animation depending on score
+- [ ] Two modes - "Move fast and break things" at the beginning and when there are only few bricks left - "Sniper mode (with slow motion)"

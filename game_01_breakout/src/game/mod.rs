@@ -74,6 +74,7 @@ enum PaddleMovement {
 #[derive(Component)]
 struct HalfSize(Vec2);
 
+// TODO: create a plugin for background and walls
 fn startup(mut commands: Commands) {
     commands.spawn((
         Sprite {
@@ -118,6 +119,7 @@ fn spawn_background(mut commands: Commands, texture_assets: Res<TextureAssets>) 
     ));
 }
 
+// TODO: move somewhere else or reimplement but in more bevy-ish way
 fn restart_game(
     mut next_state: ResMut<NextState<GameState>>,
     mut start_round: MessageWriter<RestartRound>,

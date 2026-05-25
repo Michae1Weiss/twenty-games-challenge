@@ -58,7 +58,7 @@ fn drive_crt(
     let slow = 1.0 - virtual_time.relative_speed(); // 0.0 at full speed → ~0.8 at slowest
     for mut s in &mut settings {
         s.time = real_time.elapsed_secs();
-        s.distortion = 0.04 + slow * 0.05;
-        s.scanline_intensity = 0.01 + slow * 0.35;
+        s.distortion = 0.04 + slow * 0.04;
+        s.scanline_intensity = 0.01 + slow * 0.55;
     }
 }
