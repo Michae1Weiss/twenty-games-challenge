@@ -22,7 +22,6 @@ fn check_victory(
 ) {
     let brick_was_removed = !removed_bricks.is_empty();
     removed_bricks.clear();
-
     if brick_was_removed && bricks.is_empty() {
         end_round.write(EndRound);
         game_state.set(GameState::Won);

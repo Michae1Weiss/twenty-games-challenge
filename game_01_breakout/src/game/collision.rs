@@ -33,6 +33,7 @@ pub enum SpinEffect {
     Impart(f32), // radian/sec
 }
 
+#[allow(dead_code)]
 #[derive(Message)]
 pub struct Collision {
     pub ball: Entity,

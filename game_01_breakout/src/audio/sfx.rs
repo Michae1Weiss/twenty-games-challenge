@@ -4,6 +4,13 @@ use crate::{audio::AudioSettings, game::Collision, state::GameState};
 
 use super::{Sfx, assets::AudioAssets};
 
+pub(super) fn plugin(app: &mut App) {
+    app.add_message::<PlaySfx>().add_systems(
+        Update,
+        (collision_sfx, play_sfx).run_if(not(in_state(GameState::AssetLoading))),
+    );
+}
+
 #[derive(Message, Clone, Copy)]
 pub enum PlaySfx {
     BallPaddle,
@@ -13,13 +20,6 @@ pub enum PlaySfx {
 
 #[derive(Component, Clone, Copy)]
 pub struct CollisionSfx(pub PlaySfx);
-
-pub(super) fn plugin(app: &mut App) {
-    app.add_message::<PlaySfx>().add_systems(
-        Update,
-        (collision_sfx, play_sfx).run_if(not(in_state(GameState::AssetLoading))),
-    );
-}
 
 fn play_sfx(
     mut play_sfx_reader: MessageReader<PlaySfx>,

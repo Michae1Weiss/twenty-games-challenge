@@ -18,6 +18,7 @@ const BRICK_SIZE: Vec2 = Vec2::new(80., 40.);
 #[derive(Component)]
 pub struct Brick;
 
+#[allow(dead_code)]
 #[derive(Message)]
 pub struct BrickDestroyed {
     position: Vec2,
@@ -89,13 +90,13 @@ where
 
 fn destroy_on_collision(
     mut commands: Commands,
-    bricks: Query<&Transform, With<Brick>>,
+    bricks: Query<(Entity, &Transform), With<Brick>>,
     mut collisions: MessageReader<Collision>,
     mut brick_destroyed_writer: MessageWriter<BrickDestroyed>,
 ) {
     for collision in collisions.read() {
-        if let Ok(translation) = bricks.get(collision.hit) {
-            commands.entity(collision.hit).despawn();
+        if let Ok((entity, translation)) = bricks.get(collision.hit) {
+            commands.entity(entity).despawn();
             brick_destroyed_writer.write(BrickDestroyed::new(translation.translation.xy()));
         }
     }
