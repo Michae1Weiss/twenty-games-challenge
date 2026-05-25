@@ -15,9 +15,9 @@ use crate::{
     GameState,
     audio::PlaySfx,
     game::{
-        Brick, EndRound, HalfSize, Paddle, PaddleMovement, Velocity, Wall,
+        Brick, EndRound, HalfSize, Paddle, PaddleMovement, Velocity,
         collision::{Collider, Collision, CollisionResponse, SpinEffect, deflect, first_contact},
-        respawn::RespawnBallArea,
+        respawn::RespawnBallArea, wall::Wall,
     },
 };
 

@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 #[derive(Component)]
-struct Wall(Plane2d);
+pub struct Wall(pub Plane2d);
 
 pub struct SpawnWalls<M: Bundle + Copy> {
     canvas_size: Vec2, // TODO: rename (maybe?)
