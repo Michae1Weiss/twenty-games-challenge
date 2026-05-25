@@ -1,8 +1,7 @@
 use bevy::prelude::*;
 
 use crate::game::{
-    TextureAssets, ball::SpawnBall, brick::SpawnBricks, paddle::SpawnPaddle,
-    respawn::SpawnRespawnArea,
+    ball::SpawnBall, brick::SpawnBricks, paddle::SpawnPaddle, respawn::SpawnRespawnArea,
 };
 
 pub const DEFAULT_PADDLE_SIZE: Vec2 = Vec2::new(200., 25.);
@@ -39,9 +38,8 @@ fn despawn_round(mut command: Commands, round_entities: Query<Entity, With<Round
         .for_each(|entity| command.entity(entity).despawn());
 }
 
-fn spawn_round(mut commands: Commands, textures: Res<TextureAssets>) {
-    // spawn_grid_of_bricks(&mut commands, &textures, RoundEntity);
-    commands.queue(SpawnBricks::new(1, 2, RoundEntity));
+fn spawn_round(mut commands: Commands) {
+    commands.queue(SpawnBricks::new(6, 13, RoundEntity));
     commands.queue(SpawnBall::new(
         Vec2::new(0.0, -50.0),
         Vec2::new(-20., -480.),
