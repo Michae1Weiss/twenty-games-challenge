@@ -23,9 +23,9 @@ impl Default for BulletTime {
     fn default() -> Self {
         Self {
             brick_threshold: 5,
-            near_distance: 400.0,
-            min_scale: 0.2,
-            ramp_rate: 6.0,
+            near_distance: 200.0,
+            min_scale: 0.1,
+            ramp_rate: 24.0,
         }
     }
 }
