@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::game::collision::{Collider, CollisionResponse, SpinEffect};
+use crate::{
+    audio::{CollisionSfx, PlaySfx},
+    game::collision::{Collider, CollisionResponse, SpinEffect},
+};
 
 #[derive(Component)]
 pub struct Wall(pub Plane2d); // TODO: Plane2d redundand? See crate::game::collision::Collider::HalfPlane
@@ -28,6 +31,7 @@ impl<M: Bundle + Copy> Command for SpawnWalls<M> {
             self.marker,
             Collider::HalfPlane { normal: Dir2::X },
             CollisionResponse::Reflect,
+            CollisionSfx(PlaySfx::BallWall),
             SpinEffect::Clear,
         ));
         // Right wall
@@ -39,6 +43,7 @@ impl<M: Bundle + Copy> Command for SpawnWalls<M> {
                 normal: Dir2::NEG_X,
             },
             CollisionResponse::Reflect,
+            CollisionSfx(PlaySfx::BallWall),
             SpinEffect::Clear,
         ));
         // Bottom wall
@@ -48,6 +53,7 @@ impl<M: Bundle + Copy> Command for SpawnWalls<M> {
             self.marker,
             Collider::HalfPlane { normal: Dir2::Y },
             CollisionResponse::Reflect,
+            CollisionSfx(PlaySfx::BallWall),
             SpinEffect::Clear,
         ));
         // Top wall
@@ -59,6 +65,7 @@ impl<M: Bundle + Copy> Command for SpawnWalls<M> {
                 normal: Dir2::NEG_Y,
             },
             CollisionResponse::Reflect,
+            CollisionSfx(PlaySfx::BallWall),
             SpinEffect::Clear,
         ));
     }

@@ -10,6 +10,7 @@ mod volume;
 
 use assets::AudioAssets;
 pub use settings::AudioSettings;
+pub use sfx::CollisionSfx;
 pub use sfx::PlaySfx;
 pub use volume::Volume;
 

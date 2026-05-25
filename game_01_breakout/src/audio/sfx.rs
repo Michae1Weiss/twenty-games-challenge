@@ -1,20 +1,23 @@
 use bevy::{audio::Volume, prelude::*};
 
-use crate::{audio::AudioSettings, state::GameState};
+use crate::{audio::AudioSettings, game::Collision, state::GameState};
 
 use super::{Sfx, assets::AudioAssets};
 
-#[derive(Message)]
+#[derive(Message, Clone, Copy)]
 pub enum PlaySfx {
     BallPaddle,
     BallWall,
     BrickBreak,
 }
 
+#[derive(Component, Clone, Copy)]
+pub struct CollisionSfx(pub PlaySfx);
+
 pub(super) fn plugin(app: &mut App) {
     app.add_message::<PlaySfx>().add_systems(
         Update,
-        play_sfx.run_if(not(in_state(GameState::AssetLoading))),
+        (collision_sfx, play_sfx).run_if(not(in_state(GameState::AssetLoading))),
     );
 }
 
@@ -37,5 +40,17 @@ fn play_sfx(
                 .with_volume(Volume::Linear(audio_settings.sfx_volume.perceptual())),
             Sfx,
         ));
+    }
+}
+
+fn collision_sfx(
+    mut collisions: MessageReader<Collision>,
+    sounds: Query<&CollisionSfx>,
+    mut play_sfx_writer: MessageWriter<PlaySfx>,
+) {
+    for collision in collisions.read() {
+        if let Ok(&CollisionSfx(sfx)) = sounds.get(collision.hit) {
+            play_sfx_writer.write(sfx);
+        }
     }
 }

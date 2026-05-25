@@ -22,6 +22,7 @@ use crate::CANVAS_SIZE;
 use crate::game::paddle::Paddle;
 pub use crate::{game::assets::TextureAssets, state::GameState};
 pub use brick::Brick;
+pub use collision::Collision;
 pub use round::EndRound;
 pub use round::RestartRound;
 pub use round::StartRound;

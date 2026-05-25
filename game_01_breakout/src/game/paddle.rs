@@ -2,11 +2,10 @@ use bevy::prelude::*;
 use bevy_transform_interpolation::prelude::TransformInterpolation;
 
 use crate::{
-    CANVAS_SIZE,
-    game::{
+    CANVAS_SIZE, audio::{CollisionSfx, PlaySfx}, game::{
         HalfSize, PaddleMovement, TextureAssets,
         collision::{Collider, CollisionResponse, SpinEffect},
-    },
+    }
 };
 
 pub(super) fn plugin(app: &mut App) {
@@ -47,7 +46,8 @@ impl<M: Bundle> Command for SpawnPaddle<M> {
                 half_size: self.size / 2.,
             },
             CollisionResponse::Deflect,
-            SpinEffect::Impart(0.005),
+            CollisionSfx(PlaySfx::BallPaddle),
+            SpinEffect::Impart(0.0),
             self.marker,
         ));
     }
@@ -56,8 +56,8 @@ impl<M: Bundle> Command for SpawnPaddle<M> {
 fn impart_spin(mut paddles: Query<(&PaddleMovement, &mut SpinEffect), With<Paddle>>) {
     for (movement, mut effect) in &mut paddles {
         *effect = SpinEffect::Impart(match movement {
-            PaddleMovement::Left => -0.005,
-            PaddleMovement::Right => 0.005,
+            PaddleMovement::Left => -0.005, // TODO: move to contants
+            PaddleMovement::Right => 0.005, // TODO: move to contants
             PaddleMovement::Idle => 0.0,
         });
     }

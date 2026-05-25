@@ -1,8 +1,11 @@
 use bevy::prelude::*;
 
-use crate::game::{
-    HalfSize, TextureAssets,
-    collision::{Collider, Collision, CollisionResponse},
+use crate::{
+    audio::{CollisionSfx, PlaySfx},
+    game::{
+        HalfSize, TextureAssets,
+        collision::{Collider, Collision, CollisionResponse},
+    },
 };
 
 pub(super) fn plugin(app: &mut App) {
@@ -77,6 +80,7 @@ where
                         half_size: BRICK_SIZE / 2.0,
                     },
                     CollisionResponse::ReflectOrPierce,
+                    CollisionSfx(PlaySfx::BrickBreak),
                 ));
             }
         }
