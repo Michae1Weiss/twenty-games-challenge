@@ -16,36 +16,89 @@ const N_BRICK_COLUMNS: u32 = 2;
 #[derive(Component)]
 pub struct Brick;
 
-/// Constructor for a single brick at a grid cell
-pub fn brick(row: u32, column: u32, texture: Handle<Image>) -> impl Bundle {
-    (
-        Brick,
-        Sprite {
-            image: texture,
-            custom_size: Some(BRICK_SIZE),
-            ..default()
-        },
-        Transform::from_xyz(
-            -480.0 + BRICK_SIZE.x * column as f32,
-            240.0 - BRICK_SIZE.y * row as f32,
-            0.0,
-        ),
-        HalfSize(BRICK_SIZE / 2.0),
-        Name::new("Brick"),
-    )
+pub struct SpawnBricks<M>
+where
+    M: Bundle + Copy,
+{
+    n_rows: u8,
+    n_columns: u8,
+    marker: M,
 }
 
-pub fn spawn_grid_of_bricks(
-    commands: &mut Commands,
-    textures: &TextureAssets,
-    marker: impl Bundle + Clone,
-) {
-    for row in 0..N_BRICK_ROWS {
-        for column in 0..N_BRICK_COLUMNS {
-            commands.spawn((brick(row, column, textures.brick.clone()), marker.clone()));
+impl<M> SpawnBricks<M>
+where
+    M: Bundle + Copy,
+{
+    pub fn new(n_rows: u8, n_columns: u8, marker: M) -> Self {
+        Self {
+            n_rows,
+            n_columns,
+            marker,
         }
     }
 }
+
+impl<M> Command for SpawnBricks<M>
+where
+    M: Bundle + Copy,
+{
+    fn apply(self, world: &mut World) -> () {
+        // TODO: remove redundand clone
+        let texture =
+            world.resource_scope(|_, textures: Mut<TextureAssets>| textures.brick.clone());
+
+        for row in 0..self.n_rows {
+            for column in 0..self.n_columns {
+                world.spawn((
+                    Brick,
+                    Sprite {
+                        image: texture.clone(),
+                        custom_size: Some(BRICK_SIZE),
+                        ..default()
+                    },
+                    Transform::from_xyz(
+                        -480.0 + BRICK_SIZE.x * column as f32,
+                        240.0 - BRICK_SIZE.y * row as f32,
+                        0.0,
+                    ),
+                    HalfSize(BRICK_SIZE / 2.0),
+                    self.marker,
+                ));
+            }
+        }
+    }
+}
+
+/// Constructor for a single brick at a grid cell
+// pub fn brick(row: u32, column: u32, texture: Handle<Image>) -> impl Bundle {
+//     (
+//         Brick,
+//         Sprite {
+//             image: texture,
+//             custom_size: Some(BRICK_SIZE),
+//             ..default()
+//         },
+//         Transform::from_xyz(
+//             -480.0 + BRICK_SIZE.x * column as f32,
+//             240.0 - BRICK_SIZE.y * row as f32,
+//             0.0,
+//         ),
+//         HalfSize(BRICK_SIZE / 2.0),
+//         Name::new("Brick"),
+//     )
+// }
+
+// pub fn spawn_grid_of_bricks(
+//     commands: &mut Commands,
+//     textures: &TextureAssets,
+//     marker: impl Bundle + Clone,
+// ) {
+//     for row in 0..N_BRICK_ROWS {
+//         for column in 0..N_BRICK_COLUMNS {
+//             commands.spawn((brick(row, column, textures.brick.clone()), marker.clone()));
+//         }
+//     }
+// }
 
 // fn spawn_bricks(mut commands: Commands, texture_assets: Res<TextureAssets>) {
 //     for row in 0..N_BRICK_ROWS {
