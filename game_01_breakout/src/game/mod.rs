@@ -8,6 +8,7 @@ use rand::prelude::*;
 pub mod assets;
 mod ball;
 mod brick;
+mod bullet_time;
 mod input;
 mod paddle;
 mod pause;
@@ -33,7 +34,7 @@ pub(crate) fn plugin(app: &mut App) {
     .add_plugins((
         pause::plugin,
         ball::plugin,
-        // brick::plugin,
+        bullet_time::plugin,
         rules::plugin,
         round::plugin,
     ))

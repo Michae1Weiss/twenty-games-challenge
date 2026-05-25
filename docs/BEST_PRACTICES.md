@@ -39,3 +39,7 @@ Shows how `Time<Virtual>` can be used to pause, resume, slow down and speed up a
 ### Links:
 - [**github/bevy/examples** - ecs/removal_detection.rs](https://github.com/bevyengine/bevy/blob/main/examples/ecs/removal_detection.rs)
 - [**docs.rs/bevy** - bevy::prelude::RemovedComponents](https://docs.rs/bevy/latest/bevy/prelude/struct.RemovedComponents.html)
+
+## How to slow gameplay down?
+### Links
+- [**github/bevy/examples** - time/virtual_time.rs](https://github.com/bevyengine/bevy/blob/main/examples/time/virtual_time.rs)

@@ -39,7 +39,7 @@ fn despawn_round(mut command: Commands, round_entities: Query<Entity, With<Round
 }
 
 fn spawn_round(mut commands: Commands) {
-    commands.queue(SpawnBricks::new(6, 13, RoundEntity));
+    commands.queue(SpawnBricks::new(1, 6, RoundEntity));
     commands.queue(SpawnBall::new(
         Vec2::new(0.0, -50.0),
         Vec2::new(-20., -480.),
