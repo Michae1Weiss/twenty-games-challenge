@@ -69,7 +69,7 @@ where
     }
 }
 
-/// Constructor for a single brick at a grid cell
+// /// Constructor for a single brick at a grid cell
 // pub fn brick(row: u32, column: u32, texture: Handle<Image>) -> impl Bundle {
 //     (
 //         Brick,

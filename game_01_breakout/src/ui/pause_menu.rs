@@ -1,6 +1,10 @@
 use bevy::prelude::*;
 
-use crate::{GameState, Screen, game::RestartRound, ui::widget::*};
+use crate::{
+    GameState, Screen,
+    game::{EndRound, RestartRound},
+    ui::widget::*,
+};
 
 pub(super) fn plugin(app: &mut App) {
     app.add_message::<RestartGame>()
@@ -46,7 +50,9 @@ fn to_main_menu(
     _: On<Pointer<Click>>,
     mut next_app: ResMut<NextState<GameState>>,
     mut next_screen: ResMut<NextState<Screen>>,
+    mut end_round_writer: MessageWriter<EndRound>,
 ) {
+    end_round_writer.write_default();
     next_app.set(GameState::Menu);
     next_screen.set(Screen::Main);
 }
