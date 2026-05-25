@@ -2,7 +2,11 @@
 use crate::{
     GameState, Screen,
     audio::{AudioSettings, Volume},
-    ui::{stepper::Stepper, stepper::stepper, widget::*},
+    ui::{
+        UiAssets,
+        stepper::{Stepper, stepper},
+        widget::*,
+    },
 };
 use bevy::prelude::*;
 
@@ -19,12 +23,12 @@ pub(super) fn plugin(app: &mut App) {
         );
 }
 
-fn spawn(mut commands: Commands, settings: Res<AudioSettings>) {
+fn spawn(mut commands: Commands, settings: Res<AudioSettings>, ui_assets: Res<UiAssets>) {
     commands.spawn((
         ui_root("SettingsMenu"),
         DespawnOnExit(Screen::Settings),
         children![
-            header("Settings"),
+            header("Settings", ui_assets.font.clone()),
             stepper(
                 "Music",
                 settings.music_volume.as_steps(),
@@ -37,7 +41,12 @@ fn spawn(mut commands: Commands, settings: Res<AudioSettings>) {
                 Volume::STEPS,
                 SfxVolume
             ),
-            button("Back", back),
+            button(
+                "Back",
+                ui_assets.button.clone(),
+                ui_assets.font.clone(),
+                back
+            ),
         ],
     ));
 }

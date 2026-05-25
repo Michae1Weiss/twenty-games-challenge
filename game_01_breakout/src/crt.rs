@@ -12,6 +12,11 @@ use bevy::{
     shader::ShaderRef,
 };
 
+pub(super) fn plugin(app: &mut App) {
+    app.add_plugins(FullscreenMaterialPlugin::<CrtSettings>::default())
+        .add_systems(Update, drive_crt);
+}
+
 #[derive(Component, ExtractComponent, Clone, Copy, ShaderType)]
 pub struct CrtSettings {
     pub distortion: f32,
@@ -40,11 +45,6 @@ impl FullscreenMaterial for CrtSettings {
             Node2d::EndMainPassPostProcessing.intern(),
         ]
     }
-}
-
-pub(super) fn plugin(app: &mut App) {
-    app.add_plugins(FullscreenMaterialPlugin::<CrtSettings>::default())
-        .add_systems(Update, drive_crt);
 }
 
 /// `time` from REAL time (the monitor never slows). `distortion`/`scanline`

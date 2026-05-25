@@ -16,6 +16,8 @@ pub enum PlaySfx {
     BallPaddle,
     BallWall,
     BrickBreak,
+    ButtonHover,
+    ButtonPress,
 }
 
 #[derive(Component, Clone, Copy)]
@@ -32,7 +34,10 @@ fn play_sfx(
             PlaySfx::BallPaddle => &audio_assets.ball_hits_paddle,
             PlaySfx::BallWall => &audio_assets.ball_hits_wall,
             PlaySfx::BrickBreak => &audio_assets.pop,
+            PlaySfx::ButtonHover => &audio_assets.button_hover,
+            PlaySfx::ButtonPress => &audio_assets.button_press,
         };
+        info!("Playing SFX...");
 
         commands.spawn((
             AudioPlayer::new(handle.clone()),

@@ -3,22 +3,37 @@ use bevy::prelude::*;
 use crate::{
     game::StartRound,
     state::{GameState, Screen},
-    ui::widget::*,
+    ui::{UiAssets, widget::*},
 };
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(OnEnter(Screen::Main), spawn);
 }
 
-fn spawn(mut commands: Commands) {
+fn spawn(mut commands: Commands, ui_assets: Res<UiAssets>) {
     commands.spawn((
         ui_root("MainMenu"),
         DespawnOnExit(Screen::Main),
         children![
-            header("Breakout"),
-            button("Play", enter_game),
-            button("Settings", open_settings),
-            button("Quit", quit_app),
+            header("Breakout", ui_assets.font.clone()),
+            button(
+                "Play",
+                ui_assets.button.clone(),
+                ui_assets.font.clone(),
+                enter_game
+            ),
+            button(
+                "Settings",
+                ui_assets.button.clone(),
+                ui_assets.font.clone(),
+                open_settings
+            ),
+            button(
+                "Quit",
+                ui_assets.button.clone(),
+                ui_assets.font.clone(),
+                quit_app
+            ),
         ],
     ));
 }

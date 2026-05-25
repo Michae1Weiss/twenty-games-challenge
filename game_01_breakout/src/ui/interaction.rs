@@ -13,13 +13,10 @@ pub(super) fn plugin(app: &mut App) {
 }
 
 fn apply_interaction_palette(
-    mut query: Query<
-        (&Interaction, &InteractionPalette, &mut BackgroundColor),
-        Changed<Interaction>,
-    >,
+    mut query: Query<(&Interaction, &InteractionPalette, &mut ImageNode), Changed<Interaction>>,
 ) {
-    for (interaction, palette, mut bg) in &mut query {
-        bg.0 = match interaction {
+    for (interaction, palette, mut image) in &mut query {
+        image.color = match interaction {
             Interaction::None => palette.none,
             Interaction::Hovered => palette.hovered,
             Interaction::Pressed => palette.pressed,

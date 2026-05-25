@@ -19,4 +19,8 @@ pub struct AudioAssets {
     pub ball_hits_wall: Handle<AudioSource>,
     #[asset(path = "sfx/applause.ogg")]
     pub applause: Handle<AudioSource>,
+    #[asset(path = "sfx/button_hover_10x_lauder.ogg")]
+    pub button_hover: Handle<AudioSource>,
+    #[asset(path = "sfx/button_press_10x_lauder.ogg")]
+    pub button_press: Handle<AudioSource>,
 }

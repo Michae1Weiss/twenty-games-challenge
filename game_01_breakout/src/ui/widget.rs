@@ -1,5 +1,5 @@
 use super::interaction::InteractionPalette;
-use crate::theme::palette::*;
+use crate::{audio::PlaySfx, theme::palette::*};
 use bevy::{
     ecs::{spawn::SpawnWith, system::IntoObserverSystem},
     prelude::*,
@@ -26,11 +26,15 @@ pub fn ui_root(name: impl Into<Cow<'static, str>>) -> impl Bundle {
     )
 }
 
-pub fn header(text: impl Into<String>) -> impl Bundle {
+pub fn header(text: impl Into<String>, font: Handle<Font>) -> impl Bundle {
     (
         Name::new("Header"),
         Text(text.into()),
-        TextFont::from_font_size(48.0),
+        TextFont {
+            font,
+            font_size: 48.0,
+            ..default()
+        },
         TextColor(HEADER_TEXT),
     )
 }
@@ -42,7 +46,12 @@ pub fn header(text: impl Into<String>) -> impl Bundle {
 ///       next.set(AppState::InGame);
 ///   })
 ///   button("Quit",     on_quit_pressed)   // where fn on_quit_pressed(_: On<Pointer<Click>>, ...) {}
-pub fn button<E, B, M, I>(text: impl Into<String>, action: I) -> impl Bundle
+pub fn button<E, B, M, I>(
+    text: impl Into<String>,
+    image: Handle<Image>,
+    font: Handle<Font>,
+    action: I,
+) -> impl Bundle
 where
     E: EntityEvent,
     B: Bundle,
@@ -65,7 +74,8 @@ where
                         justify_content: JustifyContent::Center,
                         ..default()
                     },
-                    BackgroundColor(BUTTON_BACKGROUND),
+                    // BackgroundColor(BUTTON_BACKGROUND),
+                    ImageNode::new(image),
                     InteractionPalette {
                         none: BUTTON_BACKGROUND,
                         hovered: BUTTON_HOVERED,
@@ -74,13 +84,25 @@ where
                     children![(
                         Name::new("Button Text"),
                         Text(text),
-                        TextFont::from_font_size(28.0),
+                        TextFont {
+                            font,
+                            font_size: 28.0,
+                            ..default()
+                        },
                         TextColor(BUTTON_TEXT),
                         // Clicks on the text should bubble to the button, not be intercepted.
                         Pickable::IGNORE,
                     )],
                 ))
-                .observe(action);
+                .observe(action)
+                .observe(|_: On<Pointer<Over>>, mut sfx: MessageWriter<PlaySfx>| {
+                    info!("Over");
+                    sfx.write(PlaySfx::ButtonHover);
+                })
+                .observe(|_: On<Pointer<Press>>, mut sfx: MessageWriter<PlaySfx>| {
+                    info!("Press");
+                    sfx.write(PlaySfx::ButtonPress);
+                });
         })),
     )
 }

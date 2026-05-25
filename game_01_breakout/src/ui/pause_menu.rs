@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::{
     GameState, Screen,
     game::{EndRound, RestartRound},
-    ui::widget::*,
+    ui::{UiAssets, widget::*},
 };
 
 pub(super) fn plugin(app: &mut App) {
@@ -15,16 +15,36 @@ pub(super) fn plugin(app: &mut App) {
 #[derive(Message)]
 pub struct RestartGame;
 
-fn spawn(mut commands: Commands) {
+fn spawn(mut commands: Commands, ui_assets: Res<UiAssets>) {
     commands.spawn((
         ui_root("PauseMenu"),
         DespawnOnExit(Screen::Pause),
         children![
-            header("Paused"),
-            button("Continue", resume),
-            button("Restart", restart),
-            button("Settings", open_settings),
-            button("Main Menu", to_main_menu),
+            header("Paused", ui_assets.font.clone()),
+            button(
+                "Continue",
+                ui_assets.button.clone(),
+                ui_assets.font.clone(),
+                resume
+            ),
+            button(
+                "Restart",
+                ui_assets.button.clone(),
+                ui_assets.font.clone(),
+                restart
+            ),
+            button(
+                "Settings",
+                ui_assets.button.clone(),
+                ui_assets.font.clone(),
+                open_settings
+            ),
+            button(
+                "Main Menu",
+                ui_assets.button.clone(),
+                ui_assets.font.clone(),
+                to_main_menu
+            ),
         ],
     ));
 }

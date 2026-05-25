@@ -17,8 +17,8 @@ pub enum GameState {
 #[derive(States, Debug, Clone, Copy, Default, Eq, PartialEq, Hash)]
 pub enum Screen {
     #[default]
+    None,
     Main,
     Pause,
     Settings,
-    None,
 }
