@@ -43,3 +43,14 @@ Shows how `Time<Virtual>` can be used to pause, resume, slow down and speed up a
 ## How to slow gameplay down?
 ### Links
 - [**github/bevy/examples** - time/virtual_time.rs](https://github.com/bevyengine/bevy/blob/main/examples/time/virtual_time.rs)
+
+## How to group systems? For examle systems that should be pausable?
+Use `SystemSet`
+### Links
+- [**docs.rs/bevy** - bevy::prelude::SystemSet](https://docs.rs/bevy/latest/bevy/ecs/prelude/trait.SystemSet.html)
+- [**github/TheBevyFlock/bevy_new_2d** - main/src/main.rs](https://github.com/TheBevyFlock/bevy_new_2d/blob/main/src/main.rs#L97)
+
+## Input handling, how to make it?
+### Links
+- [**docs.rs/bevy_enhanced_input** - Crate bevy_enhanced_input](https://docs.rs/bevy_enhanced_input/latest/bevy_enhanced_input/)
+- [**github** - leafwing-input-manager](https://github.com/Leafwing-Studios/leafwing-input-manager)
