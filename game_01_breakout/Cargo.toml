@@ -12,4 +12,3 @@ bevy_hanabi = { workspace = true }
 bevy_asset_loader = { workspace = true }
 bevy_transform_interpolation = { workspace = true }
 rand = { workspace = true }
-# rand_chacha = { workspace = true }
