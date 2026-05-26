@@ -13,8 +13,8 @@ use crate::{
     state::Screen,
 };
 
-const DOT_SPACING: f32 = 16.0; // world units between dots
-const DOT_RADIUS: f32 = 2.5;
+const DOT_SPACING: f32 = 32.0; // world units between dots
+const DOT_RADIUS: f32 = 3.0;
 const DOT_Z: f32 = 5.0; // above the playfield; tune to your layers
 const MAX_LENGTH: f32 = 1200.0; // total arc-length budget for the whole line
 const MAX_BOUNCES: u32 = 8; // belt-and-suspenders cap on reflections
