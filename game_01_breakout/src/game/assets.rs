@@ -11,6 +11,4 @@ pub struct TextureAssets {
     pub ball: Handle<Image>,
     #[asset(path = "textures/background-felt.png")]
     pub background: Handle<Image>,
-    #[asset(path = "textures/danger-zone.png")]
-    pub danger_zone: Handle<Image>,
 }

@@ -1,13 +1,6 @@
-use bevy::{
-    color::palettes::{css::RED, tailwind::RED_200},
-    prelude::*,
-    sprite::Anchor,
-};
+use bevy::{color::palettes::css::RED, prelude::*, sprite::Anchor};
 
-use crate::{
-    CANVAS_SIZE,
-    game::{TextureAssets, round::DEFAULT_PADDLE_SIZE},
-};
+use crate::{CANVAS_SIZE, game::round::DEFAULT_PADDLE_SIZE};
 
 #[derive(Component)]
 pub struct RespawnBallArea;
@@ -24,10 +17,6 @@ impl<M: Bundle> SpawnRespawnArea<M> {
 
 impl<M: Bundle> Command for SpawnRespawnArea<M> {
     fn apply(self, world: &mut World) -> () {
-        let texture = world.resource_scope(|_, texture_assets: Mut<TextureAssets>| {
-            texture_assets.danger_zone.clone()
-        });
-
         // TODO: remove constant coupling
         world.spawn((
             Sprite {
