@@ -37,6 +37,12 @@ pub struct Spin {
     curve_force: f32,
 }
 
+impl Spin {
+    pub fn clear(&mut self) {
+        self.curve_force = 0.0;
+    }
+}
+
 pub struct SpawnBall<M: Bundle> {
     position: Vec2,
     velocity: Vec2,

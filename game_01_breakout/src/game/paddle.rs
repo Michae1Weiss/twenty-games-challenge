@@ -2,14 +2,16 @@ use bevy::prelude::*;
 use bevy_transform_interpolation::prelude::TransformInterpolation;
 
 use crate::{
-    CANVAS_SIZE, audio::{CollisionSfx, PlaySfx}, game::{
+    CANVAS_SIZE,
+    audio::{CollisionSfx, PlaySfx},
+    game::{
         HalfSize, PaddleMovement, TextureAssets,
-        collision::{Collider, CollisionResponse, SpinEffect},
-    }
+        collision::{Collider, CollisionResponse, SpinEffect}, phase::GamePhase,
+    },
 };
 
 pub(super) fn plugin(app: &mut App) {
-    app.add_systems(Update, impart_spin);
+    app.add_systems(Update, impart_spin.run_if(in_state(GamePhase::Open)));
 }
 
 #[derive(Component)]

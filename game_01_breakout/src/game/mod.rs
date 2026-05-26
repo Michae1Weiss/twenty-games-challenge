@@ -5,6 +5,7 @@ use bevy_asset_loader::prelude::*;
 use bevy_hanabi::prelude::*;
 use rand::prelude::*;
 
+mod aim_line;
 pub mod assets;
 mod ball;
 mod brick;
@@ -13,6 +14,7 @@ mod collision;
 mod input;
 mod paddle;
 mod pause;
+mod phase;
 mod respawn;
 mod round;
 mod rules;
@@ -41,6 +43,8 @@ pub(crate) fn plugin(app: &mut App) {
         rules::plugin,
         round::plugin,
         collision::plugin,
+        phase::plugin,
+        aim_line::plugin,
         paddle::plugin,
     ))
     .add_systems(Startup, startup)

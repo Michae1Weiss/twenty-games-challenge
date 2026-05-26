@@ -15,13 +15,12 @@ pub(super) fn plugin(app: &mut App) {
 }
 
 fn check_victory(
-    mut brick_destroyed_reader: MessageReader<BrickDestroyed>,
+    brick_destroyed_reader: MessageReader<BrickDestroyed>,
     bricks: Query<(), With<Brick>>,
     mut game_state: ResMut<NextState<GameState>>,
     mut end_round: MessageWriter<EndRound>,
 ) {
     let brick_was_removed = !brick_destroyed_reader.is_empty();
-    brick_destroyed_reader.clear();
     if brick_was_removed && bricks.is_empty() {
         end_round.write(EndRound);
         game_state.set(GameState::Won);

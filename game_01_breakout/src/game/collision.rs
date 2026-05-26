@@ -117,3 +117,90 @@ pub fn deflect(ball_pos: Vec2, paddle_center: Vec2, speed: f32) -> Vec2 {
     let angle = FRAC_PI_6.lerp(PI - FRAC_PI_6, linear);
     Vec2::from_angle(angle) * speed
 }
+
+pub struct TrajectoryParams {
+    pub max_length: f32,
+    pub max_bounces: u32,
+}
+
+/// Nudge the next ray off the surface so it doesn't re-detect the surface it
+/// just bounced from at distance 0.
+const SURFACE_EPS: f32 = 0.5;
+
+/// Walks the ball's path through reflections, writing the polyline into `out`.
+/// Returns the entity of the FIRST surface hit, so the caller can decide
+/// whether to draw (e.g. only when the first hit is the paddle).
+///
+/// Reuses the real physics: `first_contact` for geometry, `reflect_velocity`
+/// for the bounce. A brick (`BounceOrPierce`) terminates the line — that's the
+/// target. Walls and the paddle continue it. The total length is capped, so it
+/// can never run away no matter how many reflections happen.
+pub fn predict_trajectory(
+    start: Vec2,
+    mut direction: Dir2,
+    speed: f32,
+    colliders: &Query<
+        (
+            Entity,
+            &Transform,
+            &Collider,
+            &CollisionResponse,
+            Option<&SpinEffect>,
+        ),
+        Without<Ball>,
+    >,
+    params: &TrajectoryParams,
+    out: &mut Vec<Vec2>,
+) -> Option<Entity> {
+    out.clear();
+    out.push(start);
+
+    let mut position = start;
+    let mut remaining = params.max_length;
+    let mut first_hit = None;
+
+    for _ in 0..params.max_bounces {
+        let ray = Ray2d::new(position, direction);
+        let Some((contact, response, _)) = first_contact(ray, remaining, colliders) else {
+            // No hit within budget: run the final segment straight to the cap.
+            out.push(position + *direction * remaining);
+            return first_hit;
+        };
+
+        first_hit.get_or_insert(contact.entity);
+        out.push(contact.contact_point);
+        remaining -= contact.distance;
+
+        match response {
+            CollisionResponse::ReflectOrPierce => return first_hit, // hit a brick → done
+            CollisionResponse::Reflect | CollisionResponse::Deflect => {
+                let outgoing = reflect_velocity(*direction * speed, response, &contact);
+                let Ok(next) = Dir2::new(outgoing) else {
+                    return first_hit;
+                };
+                direction = next;
+                position = contact.contact_point + *next * SURFACE_EPS;
+            }
+        }
+
+        if remaining <= 0.0 {
+            return first_hit;
+        }
+    }
+
+    first_hit
+}
+
+// the single source of truth for "how a surface redirects the ball"
+fn reflect_velocity(incoming: Vec2, response: CollisionResponse, contact: &Contact) -> Vec2 {
+    match response {
+        CollisionResponse::Reflect | CollisionResponse::ReflectOrPierce => {
+            incoming.reflect(contact.contact_surface_normal.as_vec2())
+        }
+        CollisionResponse::Deflect => deflect(
+            contact.contact_point,
+            contact.hit_body_center,
+            incoming.length(),
+        ),
+    }
+}
