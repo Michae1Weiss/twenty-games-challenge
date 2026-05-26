@@ -50,6 +50,15 @@ pub struct Contact {
     pub hit_body_center: Vec2,
 }
 
+pub struct TrajectoryParams {
+    pub max_length: f32,
+    pub max_bounces: u32,
+}
+
+/// Nudge the next ray off the surface so it doesn't re-detect the surface it
+/// just bounced from at distance 0.
+const SURFACE_EPS: f32 = 0.5;
+
 pub fn first_contact(
     ray: Ray2d,
     max_distance: f32,
@@ -118,15 +127,6 @@ pub fn deflect(ball_pos: Vec2, paddle_center: Vec2, speed: f32) -> Vec2 {
     Vec2::from_angle(angle) * speed
 }
 
-pub struct TrajectoryParams {
-    pub max_length: f32,
-    pub max_bounces: u32,
-}
-
-/// Nudge the next ray off the surface so it doesn't re-detect the surface it
-/// just bounced from at distance 0.
-const SURFACE_EPS: f32 = 0.5;
-
 /// Walks the ball's path through reflections, writing the polyline into `out`.
 /// Returns the entity of the FIRST surface hit, so the caller can decide
 /// whether to draw (e.g. only when the first hit is the paddle).
@@ -191,6 +191,7 @@ pub fn predict_trajectory(
     first_hit
 }
 
+// TODO: ball still uses it's own "how a surface redirects the ball"
 // the single source of truth for "how a surface redirects the ball"
 fn reflect_velocity(incoming: Vec2, response: CollisionResponse, contact: &Contact) -> Vec2 {
     match response {
