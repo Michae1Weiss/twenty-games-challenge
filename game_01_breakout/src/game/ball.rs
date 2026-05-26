@@ -9,7 +9,7 @@ use bevy_transform_interpolation::prelude::TransformInterpolation;
 use crate::{
     GameState,
     game::{
-        EndRound, Velocity,
+        EndRound, TextureAssets, Velocity,
         collision::{Collider, Collision, CollisionResponse, SpinEffect, deflect, first_contact},
         respawn::RespawnBallArea,
     },
@@ -84,21 +84,31 @@ impl<M: Bundle> Command for SpawnBall<M> {
                 materials.add(Color::from(WHITE))
             });
 
+        let texture = world.resource_scope(|_, textures: Mut<TextureAssets>| textures.ball.clone());
+
         world.spawn((
             Ball,
             Spin { curve_force: 0.0 },
-            ParticleEffect::new(ball_ribbon_effect),
+            // ParticleEffect::new(ball_ribbon_effect),
             Velocity(self.velocity),
-            Mesh2d(ball_outer_mesh),
-            MeshMaterial2d(ball_outer_material),
-            Transform::from_xyz(self.position.x, self.position.y, 0.0),
+            // Mesh2d(ball_outer_mesh),
+            // MeshMaterial2d(ball_outer_material),
+            Sprite {
+                image: texture,
+                ..Default::default()
+            },
+            Transform::from_xyz(self.position.x, self.position.y, 1.0),
             TransformInterpolation,
             self.marker,
             children![(
-                Mesh2d(ball_inner_mesh),
-                MeshMaterial2d(ball_inner_material),
-                Transform::from_xyz(0.0, 0.0, 1.0)
+                ParticleEffect::new(ball_ribbon_effect),
+                Transform::from_xyz(0.0, 0.0, -0.5), // local offset → world z = 0.5, under the ball
             )],
+            // children![(
+            //     Mesh2d(ball_inner_mesh),
+            //     MeshMaterial2d(ball_inner_material),
+            //     Transform::from_xyz(0.0, 0.0, 1.0)
+            // )],
         ));
     }
 }

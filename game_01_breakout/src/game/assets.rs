@@ -7,6 +7,8 @@ pub struct TextureAssets {
     pub paddle: Handle<Image>,
     #[asset(path = "textures/brick-wood.png")]
     pub brick: Handle<Image>,
+    #[asset(path = "textures/ball.png")]
+    pub ball: Handle<Image>,
     #[asset(path = "textures/background-felt.png")]
     pub background: Handle<Image>,
     #[asset(path = "textures/danger-zone.png")]
