@@ -16,6 +16,7 @@ fn spawn(mut commands: Commands, ui_assets: Res<UiAssets>) {
         DespawnOnExit(Screen::Main),
         children![
             header("Breakout", ui_assets.font.clone()),
+            text("A / D — Move paddle", ui_assets.font.clone()),
             button(
                 "Play",
                 ui_assets.button.clone(),

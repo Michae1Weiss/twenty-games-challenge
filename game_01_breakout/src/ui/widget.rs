@@ -40,6 +40,19 @@ pub fn header(text: impl Into<String>, font: Handle<Font>) -> impl Bundle {
     )
 }
 
+pub fn text(text: impl Into<String>, font: Handle<Font>) -> impl Bundle {
+    (
+        Name::new("Text"),
+        Text(text.into()),
+        TextFont {
+            font,
+            font_size: 24.0,
+            ..default()
+        },
+        TextColor(HEADER_TEXT),
+    )
+}
+
 /// Standard menu button. `action` is any observer system: a closure or a fn.
 ///
 /// Examples:

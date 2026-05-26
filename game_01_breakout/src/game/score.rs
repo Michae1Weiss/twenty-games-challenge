@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::game::{Collision, EndRound, RestartRound, brick::BrickDestroyed, paddle::Paddle};
+use crate::{
+    game::{Collision, EndRound, RestartRound, brick::BrickDestroyed, paddle::Paddle},
+    ui::UiAssets,
+};
 
 pub(super) fn plugin(app: &mut App) {
     app.init_resource::<Score>()
@@ -56,9 +59,12 @@ impl<M: Bundle> Command for SpawnScoreCounter<M> {
     fn apply(self, world: &mut World) -> () {
         let score = world.resource_scope(|_, score: Mut<Score>| score.score);
 
+        let font = world.resource_scope(|_, ui_assets: Mut<UiAssets>| ui_assets.font.clone());
+
         world.spawn((
             ScoreText,
             Text2d::new(format!("Score: {}", score)),
+            TextFont { font, ..default() },
             TextColor::BLACK,
             self.marker,
         ));

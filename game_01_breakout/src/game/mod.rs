@@ -23,6 +23,7 @@ mod wall;
 
 use crate::CANVAS_SIZE;
 use crate::game::paddle::Paddle;
+use crate::ui::UiAssets;
 pub use crate::{game::assets::TextureAssets, state::GameState};
 pub use brick::Brick;
 pub use collision::Collision;
@@ -115,7 +116,7 @@ fn restart_game(
     next_state.set(GameState::Playing);
 }
 
-fn show_restart_text(mut commands: Commands) {
+fn show_restart_text(mut commands: Commands, ui_assets: Res<UiAssets>) {
     let mut rng = rand::rng();
 
     let insults = [
@@ -146,13 +147,18 @@ fn show_restart_text(mut commands: Commands) {
                 "{}! Press R to Restart Game",
                 insults.choose(&mut rng).unwrap()
             )),
-            TextFont::from_font_size(67.0),
+            // TextFont::from_font_size(67.0),
+            TextFont {
+                font: ui_assets.font.clone(),
+                font_size: 67.0,
+                ..default()
+            },
             TextColor(WHITE.into()),
         ],
     ));
 }
 
-fn show_victory_text(mut commands: Commands) {
+fn show_victory_text(mut commands: Commands, ui_assets: Res<UiAssets>) {
     commands.spawn((
         Node {
             justify_content: JustifyContent::Center,
@@ -164,7 +170,12 @@ fn show_victory_text(mut commands: Commands) {
         DespawnOnExit(GameState::Won),
         children![
             Text::new("Victory! Press R to Restart Game"),
-            TextFont::from_font_size(67.0),
+            // TextFont::from_font_size(67.0),
+            TextFont {
+                font: ui_assets.font.clone(),
+                font_size: 67.0,
+                ..default()
+            },
             TextColor(WHITE.into()),
         ],
     ));
