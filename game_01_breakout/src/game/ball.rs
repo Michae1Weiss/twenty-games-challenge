@@ -1,11 +1,6 @@
-use std::f32::consts::{FRAC_PI_6, PI};
-
 use bevy::{
     color::palettes::{css::WHITE, tailwind::SLATE_900},
-    math::{
-        FloatOrd,
-        bounding::{Aabb2d, BoundingCircle, IntersectsVolume, RayCast2d},
-    },
+    math::bounding::{Aabb2d, BoundingCircle, IntersectsVolume},
     prelude::*,
 };
 use bevy_hanabi::prelude::*;
@@ -13,12 +8,10 @@ use bevy_transform_interpolation::prelude::TransformInterpolation;
 
 use crate::{
     GameState,
-    audio::PlaySfx,
     game::{
-        Brick, EndRound, HalfSize, Paddle, PaddleMovement, Velocity,
+        EndRound, Velocity,
         collision::{Collider, Collision, CollisionResponse, SpinEffect, deflect, first_contact},
         respawn::RespawnBallArea,
-        wall::Wall,
     },
 };
 
@@ -30,7 +23,6 @@ pub(crate) fn plugin(app: &mut App) {
 }
 
 const BALL_SIZE: f32 = 10.;
-const BALL_SPIN_MAGNITUDE: f32 = 0.005; // radian/sec
 const RIBBON_SPAWN_RATE: f32 = 64.;
 const RIBBON_LIFETIME: f32 = 1.5; // Seconds
 const RIBBON_PARTICLE_CAPACITY: u32 = 100; // 64 * 1.5 = 98 or 100 (rounded)
@@ -139,7 +131,7 @@ fn build_ribbon_effect() -> EffectAsset {
         .render(size_over_time_modifier)
 }
 
-fn simulate_balls(
+pub fn simulate_balls(
     mut balls: Query<(Entity, &mut Velocity, &mut Transform, &mut Spin), With<Ball>>,
     colliders: Query<
         (
@@ -195,101 +187,6 @@ fn simulate_balls(
         }
 
         transform.translation += step.extend(0.0);
-    }
-}
-
-pub fn ball_movement(
-    mut balls: Query<(&mut Velocity, &mut Transform, &mut Spin), With<Ball>>,
-    walls: Query<(&Wall, &Transform), Without<Ball>>,
-    aabb_colliders: Query<(Entity, &Transform, &HalfSize), Without<Ball>>,
-    paddles: Query<&PaddleMovement, With<Paddle>>,
-    bricks: Query<(), With<Brick>>,
-    time: Res<Time>,
-    mut commands: Commands,
-    mut play_sfx_writer: MessageWriter<PlaySfx>,
-) {
-    for (mut velocity, mut transform, mut spin) in &mut balls {
-        velocity.0 = Vec2::from_angle(spin.curve_force).rotate(velocity.0);
-        let ball_movement_this_frame = velocity.0 * time.delta_secs();
-        let ball_move_distance = ball_movement_this_frame.length();
-        let ball_ray = Ray2d::new(transform.translation.xy(), Dir2::new(velocity.0).unwrap());
-
-        for (wall, transform) in &walls {
-            if let Some(distance_to_wall) =
-                ball_ray.intersect_plane(transform.translation.xy(), wall.0)
-                && ball_move_distance >= distance_to_wall
-            {
-                velocity.0 = velocity.0.reflect(wall.0.normal.as_vec2());
-
-                play_sfx_writer.write(PlaySfx::BallWall);
-                spin.curve_force = 0.0;
-                return;
-            }
-        }
-
-        let ball_cast = RayCast2d::from_ray(ball_ray, ball_move_distance);
-
-        if let Some((entity, origin, aabb_collider, _)) = aabb_colliders
-            .iter()
-            .filter_map(|(entity, origin, half_size)| {
-                let collider = Aabb2d::new(origin.translation.xy(), half_size.0);
-
-                let distance = ball_cast.aabb_intersection_at(&collider)?;
-
-                Some((entity, origin, collider, distance))
-            })
-            .min_by_key(|(_, _, _, distance)| FloatOrd(*distance))
-        {
-            if let Some(paddle_movement) = paddles.get(entity).ok() {
-                let direction_vector = transform.translation.xy() - origin.translation.xy();
-                let angle = direction_vector.to_angle();
-                let linear_angle = angle.clamp(0., PI) / PI;
-                let softened_angle = FRAC_PI_6.lerp(PI - FRAC_PI_6, linear_angle);
-                velocity.0 = Vec2::from_angle(softened_angle) * velocity.0.length();
-                play_sfx_writer.write(PlaySfx::BallPaddle);
-                spin.curve_force = match paddle_movement {
-                    PaddleMovement::Left => -BALL_SPIN_MAGNITUDE,
-                    PaddleMovement::Right => BALL_SPIN_MAGNITUDE,
-                    PaddleMovement::Idle => 0.0,
-                };
-            } else if bricks.get(entity).is_ok() {
-                let (hit_normal, _) = [
-                    (
-                        Vec2::new(origin.translation.x, aabb_collider.max.y),
-                        Plane2d::new(Vec2::Y),
-                    ),
-                    (
-                        Vec2::new(origin.translation.x, aabb_collider.min.y),
-                        Plane2d::new(Vec2::NEG_Y),
-                    ),
-                    (
-                        Vec2::new(aabb_collider.max.x, origin.translation.y),
-                        Plane2d::new(Vec2::X),
-                    ),
-                    (
-                        Vec2::new(aabb_collider.min.x, origin.translation.y),
-                        Plane2d::new(Vec2::NEG_X),
-                    ),
-                ]
-                .into_iter()
-                .filter_map(|(location, plane)| {
-                    ball_ray
-                        .intersect_plane(location, plane)
-                        .map(|hit_distance| (plane.normal, hit_distance))
-                })
-                .min_by_key(|(_, hit_distance)| FloatOrd(*hit_distance))
-                .unwrap();
-
-                play_sfx_writer.write(PlaySfx::BrickBreak);
-                commands.entity(entity).despawn();
-                if spin.curve_force == 0.0 {
-                    velocity.0 = velocity.0.reflect(hit_normal.into());
-                }
-            }
-            break;
-        }
-
-        transform.translation += ball_movement_this_frame.extend(0.0);
     }
 }
 

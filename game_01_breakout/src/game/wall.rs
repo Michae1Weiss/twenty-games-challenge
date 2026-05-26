@@ -6,7 +6,7 @@ use crate::{
 };
 
 #[derive(Component)]
-pub struct Wall(pub Plane2d); // TODO: Plane2d redundand? See crate::game::collision::Collider::HalfPlane
+pub struct Wall;
 
 pub struct SpawnWalls<M: Bundle + Copy> {
     canvas_size: Vec2, // TODO: rename (maybe?)
@@ -26,7 +26,7 @@ impl<M: Bundle + Copy> Command for SpawnWalls<M> {
     fn apply(self, world: &mut World) -> () {
         // Left wall
         world.spawn((
-            Wall(Plane2d::new(Vec2::X)),
+            Wall,
             Transform::from_xyz(-self.canvas_size.x / 2.0, 0.0, 0.0),
             self.marker,
             Collider::HalfPlane { normal: Dir2::X },
@@ -36,7 +36,7 @@ impl<M: Bundle + Copy> Command for SpawnWalls<M> {
         ));
         // Right wall
         world.spawn((
-            Wall(Plane2d::new(Vec2::NEG_X)),
+            Wall,
             Transform::from_xyz(self.canvas_size.x / 2.0, 0.0, 0.0),
             self.marker,
             Collider::HalfPlane {
@@ -48,7 +48,7 @@ impl<M: Bundle + Copy> Command for SpawnWalls<M> {
         ));
         // Bottom wall
         world.spawn((
-            Wall(Plane2d::new(Vec2::Y)),
+            Wall,
             Transform::from_xyz(0.0, -self.canvas_size.y / 2.0, 0.0),
             self.marker,
             Collider::HalfPlane { normal: Dir2::Y },
@@ -58,7 +58,7 @@ impl<M: Bundle + Copy> Command for SpawnWalls<M> {
         ));
         // Top wall
         world.spawn((
-            Wall(Plane2d::new(Vec2::NEG_Y)),
+            Wall,
             Transform::from_xyz(0.0, self.canvas_size.y / 2.0, 0.0),
             self.marker,
             Collider::HalfPlane {

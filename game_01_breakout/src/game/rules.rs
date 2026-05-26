@@ -10,7 +10,7 @@ pub(super) fn plugin(app: &mut App) {
         FixedUpdate,
         check_victory
             .run_if(in_state(GameState::Playing))
-            .after(super::ball::ball_movement),
+            .after(super::ball::simulate_balls),
     );
 }
 
