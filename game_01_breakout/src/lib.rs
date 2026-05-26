@@ -19,6 +19,7 @@ pub fn plugin(app: &mut App) {
     app.add_plugins((
         DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
+                title: "Breakout".into(),
                 // Use Fullscreen on the primary monitor
                 mode: WindowMode::BorderlessFullscreen(MonitorSelection::Primary),
                 ..default()
