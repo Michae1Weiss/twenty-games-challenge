@@ -18,6 +18,7 @@ mod phase;
 mod respawn;
 mod round;
 mod rules;
+mod score;
 mod wall;
 
 use crate::CANVAS_SIZE;
@@ -46,6 +47,7 @@ pub(crate) fn plugin(app: &mut App) {
         phase::plugin,
         aim_line::plugin,
         paddle::plugin,
+        score::plugin,
     ))
     .add_systems(Startup, startup)
     .add_systems(OnEnter(GameState::Playing), spawn_background)

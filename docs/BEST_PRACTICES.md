@@ -60,3 +60,7 @@ Just use **bevy_transform_interpolation** - GOATed!
 - [**github** - bevy_transform_interpolation](https://github.com/Jondolf/bevy_transform_interpolation)
 
 ## Fullscreen shader?
+
+## Where to store game score?
+In Resource!
+See [**taintedcoders.com** - Bevy Resources](https://taintedcoders.com/bevy/resources)
