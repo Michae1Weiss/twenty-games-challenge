@@ -1,4 +1,4 @@
-use bevy::{input_focus::InputDispatchPlugin, prelude::*};
+use bevy::{input_focus::InputDispatchPlugin, prelude::*, window::WindowMode};
 use bevy_asset_loader::prelude::*;
 
 mod audio;
@@ -17,7 +17,14 @@ pub use ui::RestartGame;
 
 pub fn plugin(app: &mut App) {
     app.add_plugins((
-        DefaultPlugins,
+        DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window {
+                // Use Fullscreen on the primary monitor
+                mode: WindowMode::BorderlessFullscreen(MonitorSelection::Primary),
+                ..default()
+            }),
+            ..default()
+        }),
         InputDispatchPlugin,
         TransformInterpolationPlugin::default(),
     ))
