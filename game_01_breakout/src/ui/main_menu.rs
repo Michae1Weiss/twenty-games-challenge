@@ -12,7 +12,7 @@ pub(super) fn plugin(app: &mut App) {
 
 fn spawn(mut commands: Commands, ui_assets: Res<UiAssets>) {
     commands.spawn((
-        ui_root("MainMenu"),
+        ui_root("MainMenu", ui_assets.background_menu.clone()),
         DespawnOnExit(Screen::Main),
         children![
             header("Breakout", ui_assets.font.clone()),

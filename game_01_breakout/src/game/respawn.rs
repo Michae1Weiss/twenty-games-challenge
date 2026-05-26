@@ -1,4 +1,8 @@
-use bevy::{prelude::*, sprite::Anchor};
+use bevy::{
+    color::palettes::{css::RED, tailwind::RED_200},
+    prelude::*,
+    sprite::Anchor,
+};
 
 use crate::{
     CANVAS_SIZE,
@@ -27,15 +31,15 @@ impl<M: Bundle> Command for SpawnRespawnArea<M> {
         // TODO: remove constant coupling
         world.spawn((
             Sprite {
-                image: texture,
+                color: Color::from(RED).with_alpha(0.2),
                 custom_size: Some(Vec2::new(
                     CANVAS_SIZE.x,
-                    CANVAS_SIZE.y / 8.0 - DEFAULT_PADDLE_SIZE.y / 2.0,
+                    CANVAS_SIZE.y / 8.0 - DEFAULT_PADDLE_SIZE.y / 2.0 - 60.0,
                 )),
                 ..default()
             },
             Anchor::BOTTOM_CENTER,
-            Transform::from_xyz(0.0, -CANVAS_SIZE.y / 2., -1.0),
+            Transform::from_xyz(0.0, -CANVAS_SIZE.y / 2. + 60.0, -1.0),
             RespawnBallArea,
             self.marker,
         ));

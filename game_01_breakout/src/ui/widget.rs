@@ -7,7 +7,7 @@ use bevy::{
 use std::borrow::Cow;
 
 /// Full-screen centered column. Use as the root of any menu screen.
-pub fn ui_root(name: impl Into<Cow<'static, str>>) -> impl Bundle {
+pub fn ui_root(name: impl Into<Cow<'static, str>>, image: Handle<Image>) -> impl Bundle {
     (
         Name::new(name),
         Node {
@@ -20,7 +20,8 @@ pub fn ui_root(name: impl Into<Cow<'static, str>>) -> impl Bundle {
             row_gap: px(16),
             ..default()
         },
-        BackgroundColor(SCREEN_BACKGROUND),
+        ImageNode::new(image),
+        // BackgroundColor(SCREEN_BACKGROUND),
         // Don't block underlying picking when used as an overlay.
         Pickable::IGNORE,
     )

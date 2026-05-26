@@ -1,20 +1,21 @@
 use bevy::prelude::*;
 
-// --- Button (PAPER TEXTURE TINTS) ---
-// Multiply the white paper texture. Hover = catching sunlight (cool white),
-// press = a soft sky-blue shadow, like the paper dipping into shade.
-pub const BUTTON_BACKGROUND: Color = Color::srgb(1.00, 1.00, 1.00); // paper as-is
-pub const BUTTON_HOVERED: Color = Color::srgb(0.90, 0.96, 1.00); // cool sky highlight
-pub const BUTTON_PRESSED: Color = Color::srgb(0.72, 0.82, 0.92); // soft blue shadow
-pub const BUTTON_TEXT: Color = Color::srgb(0.10, 0.16, 0.26); // deep ink-navy
+// --- Button (WARM PAPER / KRAFT TINTS) ---
+// Multiply a warm paper texture. Hover = catching warm sunlight,
+// press = dipping into a soft warm shade. Tints stay in the brown/amber
+// family so they read against the leather background instead of fighting it.
+pub const BUTTON_BACKGROUND: Color = Color::srgb(0.96, 0.94, 0.90); // warm paper, not stark white
+pub const BUTTON_HOVERED: Color = Color::srgb(1.00, 0.98, 0.90); // warm sun highlight
+pub const BUTTON_PRESSED: Color = Color::srgb(0.86, 0.78, 0.66); // soft warm shade
+pub const BUTTON_TEXT: Color = Color::srgb(0.23, 0.15, 0.09); // deep roast-brown ink
 
-// --- Text on the sky background ---
-pub const HEADER_TEXT: Color = Color::srgb(1.00, 1.00, 1.00); // crisp cloud white
-pub const LABEL_TEXT: Color = Color::srgb(0.88, 0.94, 1.00); // pale sky-white
+// --- Text on the brown background ---
+pub const HEADER_TEXT: Color = Color::srgb(0.99, 0.96, 0.92); // warm cream white
+pub const LABEL_TEXT: Color = Color::srgb(0.91, 0.83, 0.72); // pale parchment
 
-// --- Screen background: bright sky blue, not dark ---
-pub const SCREEN_BACKGROUND: Color = Color::srgb(0.42, 0.66, 0.88); // open sky blue
+// --- Screen background tint: warm kraft/leather (if you tint behind the texture) ---
+pub const SCREEN_BACKGROUND: Color = Color::srgb(0.27, 0.20, 0.16); // dark leather brown
 
-// --- Accent (sunny pop against the blue) ---
-pub const SEGMENT_FILLED: Color = Color::srgb(1.00, 0.84, 0.30); // warm sun yellow
-pub const SEGMENT_EMPTY: Color = Color::srgb(0.34, 0.54, 0.74); // muted deeper sky
+// --- Accent (sunny pop that belongs on the brown) ---
+pub const SEGMENT_FILLED: Color = Color::srgb(0.96, 0.72, 0.25); // warm sun/brick yellow
+pub const SEGMENT_EMPTY: Color = Color::srgb(0.43, 0.32, 0.22); // dim ember-brown (unfilled)

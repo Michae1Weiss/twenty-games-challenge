@@ -1,5 +1,4 @@
 use bevy::{
-    color::palettes::{css::WHITE, tailwind::SLATE_900},
     math::bounding::{Aabb2d, BoundingCircle, IntersectsVolume},
     prelude::*,
 };
@@ -66,33 +65,12 @@ impl<M: Bundle> Command for SpawnBall<M> {
                 let ribbon_effect = build_ribbon_effect();
                 effect_assets.add(ribbon_effect)
             });
-
-        let ball_outer_mesh = world
-            .resource_scope(|_, mut meshes: Mut<Assets<Mesh>>| meshes.add(Circle::new(BALL_SIZE)));
-
-        let ball_outer_material =
-            world.resource_scope(|_, mut materials: Mut<Assets<ColorMaterial>>| {
-                materials.add(Color::from(SLATE_900))
-            });
-
-        let ball_inner_mesh = world.resource_scope(|_, mut meshes: Mut<Assets<Mesh>>| {
-            meshes.add(Circle::new(BALL_SIZE - 1.0))
-        });
-
-        let ball_inner_material =
-            world.resource_scope(|_, mut materials: Mut<Assets<ColorMaterial>>| {
-                materials.add(Color::from(WHITE))
-            });
-
         let texture = world.resource_scope(|_, textures: Mut<TextureAssets>| textures.ball.clone());
 
         world.spawn((
             Ball,
             Spin { curve_force: 0.0 },
-            // ParticleEffect::new(ball_ribbon_effect),
             Velocity(self.velocity),
-            // Mesh2d(ball_outer_mesh),
-            // MeshMaterial2d(ball_outer_material),
             Sprite {
                 image: texture,
                 ..Default::default()
@@ -104,11 +82,6 @@ impl<M: Bundle> Command for SpawnBall<M> {
                 ParticleEffect::new(ball_ribbon_effect),
                 Transform::from_xyz(0.0, 0.0, -0.5), // local offset → world z = 0.5, under the ball
             )],
-            // children![(
-            //     Mesh2d(ball_inner_mesh),
-            //     MeshMaterial2d(ball_inner_material),
-            //     Transform::from_xyz(0.0, 0.0, 1.0)
-            // )],
         ));
     }
 }

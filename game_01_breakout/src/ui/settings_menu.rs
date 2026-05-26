@@ -25,7 +25,7 @@ pub(super) fn plugin(app: &mut App) {
 
 fn spawn(mut commands: Commands, settings: Res<AudioSettings>, ui_assets: Res<UiAssets>) {
     commands.spawn((
-        ui_root("SettingsMenu"),
+        ui_root("SettingsMenu", ui_assets.background_menu.clone()),
         DespawnOnExit(Screen::Settings),
         children![
             header("Settings", ui_assets.font.clone()),
@@ -33,12 +33,14 @@ fn spawn(mut commands: Commands, settings: Res<AudioSettings>, ui_assets: Res<Ui
                 "Music",
                 settings.music_volume.as_steps(),
                 Volume::STEPS,
+                ui_assets.font.clone(),
                 MusicVolume
             ),
             stepper(
                 "Sound",
                 settings.sfx_volume.as_steps(),
                 Volume::STEPS,
+                ui_assets.font.clone(),
                 SfxVolume
             ),
             button(

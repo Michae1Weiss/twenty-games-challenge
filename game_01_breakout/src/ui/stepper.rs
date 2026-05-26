@@ -34,7 +34,13 @@ pub(super) fn plugin(app: &mut App) {
 }
 
 /// The whole widget as one declarative bundle. Composes inside `children![]`.
-pub fn stepper(label: impl Into<String>, initial: u8, max: u8, marker: impl Bundle) -> impl Bundle {
+pub fn stepper(
+    label: impl Into<String>,
+    initial: u8,
+    max: u8,
+    font: Handle<Font>,
+    marker: impl Bundle,
+) -> impl Bundle {
     (
         Name::new("Stepper"),
         Node {
@@ -47,17 +53,21 @@ pub fn stepper(label: impl Into<String>, initial: u8, max: u8, marker: impl Bund
             (
                 Name::new("StepperLabel"),
                 Text(label.into()),
-                TextFont::from_font_size(20.0),
+                TextFont {
+                    font: font.clone(),
+                    font_size: 20.0,
+                    ..default()
+                },
                 TextColor(LABEL_TEXT),
             ),
-            stepper_row(initial, max, marker),
+            stepper_row(initial, max, font, marker),
         ],
     )
 }
 
 /// The [−] segments… [+] row. `Stepper` lives here so buttons/segments are
 /// its DIRECT children — one `ChildOf` hop, no hierarchy walking.
-fn stepper_row(initial: u8, max: u8, marker: impl Bundle) -> impl Bundle {
+fn stepper_row(initial: u8, max: u8, font: Handle<Font>, marker: impl Bundle) -> impl Bundle {
     (
         Name::new("StepperRow"),
         Stepper {
@@ -74,9 +84,9 @@ fn stepper_row(initial: u8, max: u8, marker: impl Bundle) -> impl Bundle {
         // Static button + dynamic segments + static button: the declarative
         // composition the `children!` macro can't express on its own.
         Children::spawn((
-            Spawn(step_button("-", -1)),
+            Spawn(step_button("-", -1, font.clone())),
             SpawnIter((0..max).map(Segment).map(segment)),
-            Spawn(step_button("+", 1)),
+            Spawn(step_button("+", 1, font)),
         )),
     )
 }
@@ -95,7 +105,7 @@ fn segment(seg: Segment) -> impl Bundle {
     )
 }
 
-fn step_button(glyph: &str, delta: i8) -> impl Bundle {
+fn step_button(glyph: &str, delta: i8, font: Handle<Font>) -> impl Bundle {
     (
         Button,
         StepperButton { delta }, // carries the action data → no observer needed
@@ -116,7 +126,12 @@ fn step_button(glyph: &str, delta: i8) -> impl Bundle {
         },
         children![(
             Text(glyph.to_string()),
-            TextFont::from_font_size(28.0),
+            // TextFont::from_font_size(28.0),
+            TextFont {
+                font: font,
+                font_size: 28.0,
+                ..default()
+            },
             TextColor(BUTTON_TEXT),
             Pickable::IGNORE,
         )],

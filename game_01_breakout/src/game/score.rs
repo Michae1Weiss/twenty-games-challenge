@@ -59,6 +59,7 @@ impl<M: Bundle> Command for SpawnScoreCounter<M> {
         world.spawn((
             ScoreText,
             Text2d::new(format!("Score: {}", score)),
+            TextColor::BLACK,
             self.marker,
         ));
     }

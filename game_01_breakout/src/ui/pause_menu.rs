@@ -17,7 +17,7 @@ pub struct RestartGame;
 
 fn spawn(mut commands: Commands, ui_assets: Res<UiAssets>) {
     commands.spawn((
-        ui_root("PauseMenu"),
+        ui_root("PauseMenu", ui_assets.background_menu.clone()),
         DespawnOnExit(Screen::Pause),
         children![
             header("Paused", ui_assets.font.clone()),

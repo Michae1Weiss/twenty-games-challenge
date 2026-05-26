@@ -7,4 +7,6 @@ pub struct UiAssets {
     pub button: Handle<Image>,
     #[asset(path = "fonts/PermanentMarker-Regular.ttf")]
     pub font: Handle<Font>,
+    #[asset(path = "textures/background-menu.png")]
+    pub background_menu: Handle<Image>,
 }
