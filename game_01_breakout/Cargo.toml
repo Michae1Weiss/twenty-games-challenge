@@ -1,5 +1,5 @@
 [package]
-name = "game_01_breakout"
+name = "breakout"
 version = "0.1.0"
 edition = "2024"
 

@@ -2,5 +2,5 @@
 use bevy::prelude::*;
 
 fn main() {
-    App::new().add_plugins(game_01_breakout::plugin).run();
+    App::new().add_plugins(breakout::plugin).run();
 }

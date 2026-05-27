@@ -1770,6 +1770,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "breakout"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy_asset_loader",
+ "bevy_hanabi",
+ "bevy_transform_interpolation",
+ "rand",
+ "winresource",
+]
+
+[[package]]
 name = "bumpalo"
 version = "3.20.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2557,18 +2569,6 @@ dependencies = [
  "futures-task",
  "pin-project-lite",
  "slab",
-]
-
-[[package]]
-name = "game_01_breakout"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "bevy_asset_loader",
- "bevy_hanabi",
- "bevy_transform_interpolation",
- "rand",
- "winresource",
 ]
 
 [[package]]
