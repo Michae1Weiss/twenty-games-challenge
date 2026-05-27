@@ -1,8 +1,12 @@
 # Twenty Games Challenge
 Me trying to complete [The 20 Games Challenge](https://20gameschallenge.org/)
 
-## Game 01 - Breakout
-### Start a game in debug mode (with dynamic linking on)
+## Try it out :)
+- [Game #1 - Breakout (Web)](https://michae1weiss.github.io/twenty-games-challenge/breakout/)
+
+## Catalog
+### Game #1 - Breakout
+#### Start a game in debug mode (with dynamic linking on)
 ```bash
 cargo dev -p game_01_breakout
 ```
