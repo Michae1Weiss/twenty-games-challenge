@@ -21,7 +21,6 @@ pub fn ui_root(name: impl Into<Cow<'static, str>>, image: Handle<Image>) -> impl
             ..default()
         },
         ImageNode::new(image),
-        // BackgroundColor(SCREEN_BACKGROUND),
         // Don't block underlying picking when used as an overlay.
         Pickable::IGNORE,
     )
@@ -88,7 +87,6 @@ where
                         justify_content: JustifyContent::Center,
                         ..default()
                     },
-                    // BackgroundColor(BUTTON_BACKGROUND),
                     ImageNode::new(image),
                     InteractionPalette {
                         none: BUTTON_BACKGROUND,

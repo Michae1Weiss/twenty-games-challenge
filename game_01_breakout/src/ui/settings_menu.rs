@@ -10,11 +10,6 @@ use crate::{
 };
 use bevy::prelude::*;
 
-#[derive(Component)]
-struct MusicVolume;
-#[derive(Component)]
-struct SfxVolume;
-
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(OnEnter(Screen::Settings), spawn)
         .add_systems(
@@ -22,6 +17,12 @@ pub(super) fn plugin(app: &mut App) {
             (bind_music, bind_sfx).run_if(in_state(Screen::Settings)),
         );
 }
+
+#[derive(Component)]
+struct MusicVolume;
+
+#[derive(Component)]
+struct SfxVolume;
 
 fn spawn(mut commands: Commands, settings: Res<AudioSettings>, ui_assets: Res<UiAssets>) {
     commands.spawn((

@@ -13,6 +13,15 @@ use crate::{
     state::Screen,
 };
 
+pub(super) fn plugin(app: &mut App) {
+    app.add_systems(OnEnter(GamePhase::Sniper), spawn_dot_pool)
+        .add_systems(OnExit(GamePhase::Sniper), despawn_dot_pool)
+        .add_systems(
+            Update,
+            render_aim_line.run_if(in_state(GamePhase::Sniper).and(in_state(Screen::None))),
+        );
+}
+
 const DOT_SPACING: f32 = 32.0; // world units between dots
 const DOT_RADIUS: f32 = 3.0;
 const DOT_Z: f32 = 5.0; // above the playfield; tune to your layers
@@ -22,15 +31,6 @@ const DOT_POOL: usize = 80; // ≈ MAX_LENGTH / DOT_SPACING + slack
 
 #[derive(Component)]
 struct AimDot;
-
-pub(super) fn plugin(app: &mut App) {
-    app.add_systems(OnEnter(GamePhase::Sniper), spawn_dot_pool)
-        .add_systems(OnExit(GamePhase::Sniper), despawn_dot_pool)
-        .add_systems(
-            Update,
-            render_aim_line.run_if(in_state(GamePhase::Sniper).and(in_state(Screen::None))),
-        );
-}
 
 fn spawn_dot_pool(
     mut commands: Commands,

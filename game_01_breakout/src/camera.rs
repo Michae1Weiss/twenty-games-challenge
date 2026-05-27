@@ -1,12 +1,12 @@
 use crate::crt::CrtSettings;
 use bevy::{camera::ScalingMode, prelude::*};
 
-pub const CANVAS_SIZE: Vec2 = Vec2::new(1280., 720.);
-const CANVAS_PADDING: Vec2 = Vec2::new(80., 40.);
-
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(Startup, spawn_camera);
 }
+
+pub const CANVAS_SIZE: Vec2 = Vec2::new(1280., 720.);
+const CANVAS_PADDING: Vec2 = Vec2::new(80., 40.);
 
 fn spawn_camera(mut commands: Commands) {
     commands.spawn((

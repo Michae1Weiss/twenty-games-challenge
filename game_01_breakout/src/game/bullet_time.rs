@@ -4,6 +4,19 @@ use crate::{
 };
 use bevy::{math::curve::EaseFunction, prelude::*};
 
+pub(super) fn plugin(app: &mut App) {
+    app.init_resource::<BulletTime>()
+        .register_type::<BulletTime>()
+        // Sniper is a substate of Playing, so this implies in-game already.
+        .add_systems(
+            Update,
+            drive_bullet_time.run_if(in_state(GamePhase::Sniper).and(in_state(Screen::None))),
+        )
+        // Restore normal time whenever we leave sniper OR stop playing.
+        .add_systems(OnExit(GamePhase::Sniper), reset_time_scale)
+        .add_systems(OnExit(GameState::Playing), reset_time_scale);
+}
+
 /// Game-feel tuning, live-editable in the inspector.
 #[derive(Resource, Reflect, Debug, Clone)]
 #[reflect(Resource)]
@@ -24,19 +37,6 @@ impl Default for BulletTime {
             ramp_rate: 24.0,
         }
     }
-}
-
-pub(super) fn plugin(app: &mut App) {
-    app.init_resource::<BulletTime>()
-        .register_type::<BulletTime>()
-        // Sniper is a substate of Playing, so this implies in-game already.
-        .add_systems(
-            Update,
-            drive_bullet_time.run_if(in_state(GamePhase::Sniper).and(in_state(Screen::None))),
-        )
-        // Restore normal time whenever we leave sniper OR stop playing.
-        .add_systems(OnExit(GamePhase::Sniper), reset_time_scale)
-        .add_systems(OnExit(GameState::Playing), reset_time_scale);
 }
 
 fn target_scale(

@@ -3,11 +3,10 @@ use bevy::prelude::*;
 use crate::{
     CANVAS_SIZE,
     game::{
-        ball::SpawnBall, brick::SpawnBricks, paddle::SpawnPaddle, respawn::SpawnRespawnArea, score::SpawnScoreCounter, wall::SpawnWalls
+        ball::SpawnBall, brick::SpawnBricks, paddle::SpawnPaddle, respawn::SpawnRespawnArea,
+        score::SpawnScoreCounter, wall::SpawnWalls,
     },
 };
-
-pub const DEFAULT_PADDLE_SIZE: Vec2 = Vec2::new(200., 25.);
 
 pub(super) fn plugin(app: &mut App) {
     app.add_message::<RestartRound>()
@@ -22,6 +21,8 @@ pub(super) fn plugin(app: &mut App) {
         .add_systems(Update, spawn_round.run_if(on_message::<StartRound>))
         .add_systems(Update, despawn_round.run_if(on_message::<EndRound>));
 }
+
+pub const DEFAULT_PADDLE_SIZE: Vec2 = Vec2::new(200., 25.);
 
 #[derive(Message, Default)]
 pub struct RestartRound;

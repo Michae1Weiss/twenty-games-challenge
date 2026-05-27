@@ -1,15 +1,15 @@
 use bevy::prelude::*;
 
+pub(super) fn plugin(app: &mut App) {
+    app.add_systems(Update, apply_interaction_palette);
+}
+
 /// Drives BackgroundColor from Interaction. Attach to any button-like entity.
 #[derive(Component, Clone, Copy, Debug)]
 pub struct InteractionPalette {
     pub none: Color,
     pub hovered: Color,
     pub pressed: Color,
-}
-
-pub(super) fn plugin(app: &mut App) {
-    app.add_systems(Update, apply_interaction_palette);
 }
 
 fn apply_interaction_palette(

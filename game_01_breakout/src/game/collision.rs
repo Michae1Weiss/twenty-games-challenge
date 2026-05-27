@@ -14,6 +14,10 @@ pub(super) fn plugin(app: &mut App) {
     app.add_message::<Collision>();
 }
 
+/// Nudge the next ray off the surface so it doesn't re-detect the surface it
+/// just bounced from at distance 0.
+const SURFACE_EPS: f32 = 0.5;
+
 #[derive(Component)]
 pub enum Collider {
     Aabb { half_size: Vec2 },   // e.g. brick, paddle
@@ -54,10 +58,6 @@ pub struct TrajectoryParams {
     pub max_length: f32,
     pub max_bounces: u32,
 }
-
-/// Nudge the next ray off the surface so it doesn't re-detect the surface it
-/// just bounced from at distance 0.
-const SURFACE_EPS: f32 = 0.5;
 
 pub fn first_contact(
     ray: Ray2d,

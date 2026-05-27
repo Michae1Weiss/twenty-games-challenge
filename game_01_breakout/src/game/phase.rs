@@ -10,6 +10,16 @@ use crate::{
     state::GameState,
 };
 
+pub(super) fn plugin(app: &mut App) {
+    app.init_resource::<GameRules>()
+        .add_sub_state::<GamePhase>()
+        .add_systems(
+            Update,
+            update_game_phase.run_if(in_state(GameState::Playing)),
+        )
+        .add_systems(OnEnter(GamePhase::Sniper), enter_sniper);
+}
+
 #[derive(SubStates, Clone, PartialEq, Eq, Hash, Debug, Default)]
 #[source(GameState = GameState::Playing)]
 pub enum GamePhase {
@@ -30,16 +40,6 @@ impl Default for GameRules {
             sniper_threshold: 5,
         }
     }
-}
-
-pub(super) fn plugin(app: &mut App) {
-    app.init_resource::<GameRules>()
-        .add_sub_state::<GamePhase>()
-        .add_systems(
-            Update,
-            update_game_phase.run_if(in_state(GameState::Playing)),
-        )
-        .add_systems(OnEnter(GamePhase::Sniper), enter_sniper);
 }
 
 fn update_game_phase(

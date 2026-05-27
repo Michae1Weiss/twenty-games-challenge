@@ -23,8 +23,9 @@ mod wall;
 
 use crate::CANVAS_SIZE;
 use crate::game::paddle::Paddle;
+pub use crate::state::GameState;
 use crate::ui::UiAssets;
-pub use crate::{game::assets::TextureAssets, state::GameState};
+pub use assets::TextureAssets;
 pub use brick::Brick;
 pub use collision::Collision;
 pub use round::EndRound;
@@ -147,7 +148,6 @@ fn show_restart_text(mut commands: Commands, ui_assets: Res<UiAssets>) {
                 "{}! Press R to Restart Game",
                 insults.choose(&mut rng).unwrap()
             )),
-            // TextFont::from_font_size(67.0),
             TextFont {
                 font: ui_assets.font.clone(),
                 font_size: 67.0,
@@ -170,7 +170,6 @@ fn show_victory_text(mut commands: Commands, ui_assets: Res<UiAssets>) {
         DespawnOnExit(GameState::Won),
         children![
             Text::new("Victory! Press R to Restart Game"),
-            // TextFont::from_font_size(67.0),
             TextFont {
                 font: ui_assets.font.clone(),
                 font_size: 67.0,

@@ -1,10 +1,19 @@
-// ui/stepper.rs
 use super::interaction::InteractionPalette;
 use crate::theme::palette::*;
 use bevy::{
     ecs::spawn::{Spawn, SpawnIter},
     prelude::*,
 };
+
+pub(super) fn plugin(app: &mut App) {
+    app.add_systems(Update, (handle_stepper_buttons, recolor_segments).chain());
+}
+
+// Portrait segments read as a level meter. For literal brick consistency
+// (2:1 landscape) swap to (36, 18) — but portrait is the right UX, see below.
+const SEG_W: f32 = 18.0;
+const SEG_H: f32 = 36.0;
+const STEP_BTN: f32 = 48.0;
 
 /// A discrete value control:  label above,  [−] ▮▮▯▯… [+]  below.
 /// Generic and self-owned — bind it to game state with a marker + a
@@ -22,16 +31,6 @@ struct StepperButton {
 
 #[derive(Component)]
 struct Segment(u8);
-
-// Portrait segments read as a level meter. For literal brick consistency
-// (2:1 landscape) swap to (36, 18) — but portrait is the right UX, see below.
-const SEG_W: f32 = 18.0;
-const SEG_H: f32 = 36.0;
-const STEP_BTN: f32 = 48.0;
-
-pub(super) fn plugin(app: &mut App) {
-    app.add_systems(Update, (handle_stepper_buttons, recolor_segments).chain());
-}
 
 /// The whole widget as one declarative bundle. Composes inside `children![]`.
 pub fn stepper(
@@ -101,7 +100,6 @@ fn segment(seg: Segment) -> impl Bundle {
             ..default()
         },
         BackgroundColor(SEGMENT_EMPTY), // recolored on spawn (counts as Changed)
-                                        // BorderRadius::all(px(3)),
     )
 }
 
@@ -118,7 +116,6 @@ fn step_button(glyph: &str, delta: i8, font: Handle<Font>) -> impl Bundle {
             ..default()
         },
         BackgroundColor(BUTTON_BACKGROUND),
-        // BorderRadius::all(px(8)),
         InteractionPalette {
             none: BUTTON_BACKGROUND,
             hovered: BUTTON_HOVERED,
@@ -126,7 +123,6 @@ fn step_button(glyph: &str, delta: i8, font: Handle<Font>) -> impl Bundle {
         },
         children![(
             Text(glyph.to_string()),
-            // TextFont::from_font_size(28.0),
             TextFont {
                 font: font,
                 font_size: 28.0,
