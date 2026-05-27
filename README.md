@@ -9,8 +9,16 @@ cargo dev -p game_01_breakout
 > Note: `cargo dev` is an alias for `cargo run --feature dev`
 
 ## How to
+### Build for web
+```bash
+bevy build -p breakout --release web --bundle
+# Test locally
+(sleep 5 && python3 -m webbrowser -t "http://localhost:8000") &
+python3 -m http.server 8000 --directory target/bevy_web/web-release/breakout
+```
+
 ### Convert MP3 to OGG
-```console
+```bash
 # Linux
 ffmpeg -i input.mp3 -c:a libvorbis -q:a 4 output.ogg --enable-libvorbis
 # macOS

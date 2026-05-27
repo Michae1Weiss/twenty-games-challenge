@@ -1,17 +1,26 @@
 If you hosting a game on GitHub create a branch **gh-pages** and add **.nojekyll** file at its root!
 
 ```bash
-git worktree add ../gh-pages gh-pages
+# from project root
+git checkout --orphan gh-pages
+git rm -rf .
 touch .nojekyll
-echo "This file makes sure that Github Pages doesn't process mdBook's output." >> .nojekyll
+touch index.html
+# add content to index.html, it's your landing page
+git add .nojekyll index.html
+git commit -m "initialize gh-pages"
+git push -u origin gh-pages
+git checkout main
 ```
 
-```yaml
-      - name: 🔗 Symlink Latest Build
-        run: |
-          mkdir latest-symlink-dir
-          ln -s ./${{ github.ref_name }} latest
-          mv latest latest-symlink-dir
+## Push to gh-pages
+```bash
+SLUG=breakout
+SRC=target/bevy_web/web-release/breakout
+DEST=../gh-pages/$SLUG
+rm -rI "$DEST"
+cp -r "$SRC" "$DEST"
+( cd ../gh-pages && git add "$SLUG" && git commit -m "ops: deploy $SLUG" && git push )
 ```
 
 ## Links

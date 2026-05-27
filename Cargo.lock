@@ -1777,6 +1777,7 @@ dependencies = [
  "bevy_asset_loader",
  "bevy_hanabi",
  "bevy_transform_interpolation",
+ "getrandom 0.3.4",
  "rand",
  "winresource",
 ]

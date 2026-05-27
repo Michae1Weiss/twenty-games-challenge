@@ -15,3 +15,10 @@ rand = { workspace = true }
 
 [build-dependencies]
 winresource = "0.1"
+
+[package.metadata.bevy_cli.web]
+default-features = false
+features = ["bevy/webgpu"]
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+getrandom = { version = "0.3", features = ["wasm_js"] }
