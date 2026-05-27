@@ -14,6 +14,7 @@ cargo dev -p game_01_breakout
 
 ## How to
 ### Build for web
+**Pre-requirement**: Install [bevy_cli](https://github.com/TheBevyFlock/bevy_cli). 
 ```bash
 bevy build -p breakout --release web --bundle
 # Test locally
